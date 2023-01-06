@@ -51,7 +51,7 @@ func URLHandler(w http.ResponseWriter, r *http.Request) {
 
 		if ok {
 			w.WriteHeader(http.StatusTemporaryRedirect)
-			w.Write([]byte(long))
+			w.Header().Set("Location", long)
 			return
 		} else {
 			http.Error(w, "Url with this id not found!", http.StatusNotFound)
