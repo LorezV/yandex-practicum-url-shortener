@@ -4,7 +4,6 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
-	"strings"
 )
 
 var storage map[string]string
@@ -38,9 +37,9 @@ func URLHandler(w http.ResponseWriter, r *http.Request) {
 		storage[url] = string(b)
 
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte("http://127.0.0.1:8080/" + url))
+		w.Write([]byte("http://" + r.Host + "/" + url))
 	case http.MethodGet:
-		id := strings.Split(r.URL.Path, "/")[1]
+		id := r.URL.Path[1:]
 
 		if id == "" {
 			http.Error(w, "The query parameter ID is missing", http.StatusBadRequest)
@@ -50,9 +49,8 @@ func URLHandler(w http.ResponseWriter, r *http.Request) {
 		long, ok := storage[id]
 
 		if ok {
-			w.WriteHeader(http.StatusTemporaryRedirect)
 			w.Header().Set("Location", long)
-			return
+			w.WriteHeader(http.StatusTemporaryRedirect)
 		} else {
 			http.Error(w, "Url with this id not found!", http.StatusNotFound)
 		}
