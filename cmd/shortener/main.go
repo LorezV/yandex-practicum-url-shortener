@@ -4,11 +4,12 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"strings"
 )
 
 var storage map[string]string
 
-func GenerateUrl() string {
+func GenerateURL() string {
 	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, 6)
 	for i := range b {
@@ -18,13 +19,13 @@ func GenerateUrl() string {
 	// Простая проверка на уникальность
 	_, ok := storage[string(b)]
 	if ok {
-		return GenerateUrl()
+		return GenerateURL()
 	}
 
 	return string(b)
 }
 
-func UrlHandler(w http.ResponseWriter, r *http.Request) {
+func URLHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		b, err := io.ReadAll(r.Body)
@@ -33,13 +34,13 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unknown error", http.StatusBadRequest)
 		}
 
-		url := GenerateUrl()
+		url := GenerateURL()
 		storage[url] = string(b)
 
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte("http://127.0.0.1:8080/" + url))
 	case http.MethodGet:
-		id := r.URL.Query().Get("id")
+		id := strings.Split(r.URL.Path, "/")[1]
 
 		if id == "" {
 			http.Error(w, "The query parameter ID is missing", http.StatusBadRequest)
@@ -62,6 +63,6 @@ func UrlHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	storage = make(map[string]string)
-	http.HandleFunc("/", UrlHandler)
+	http.HandleFunc("/", URLHandler)
 	http.ListenAndServe(":8080", nil)
 }
