@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
 )
@@ -31,7 +32,9 @@ func URLHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Can't add new url to storage.", http.StatusInternalServerError)
 		}
 	case http.MethodGet:
-		id := r.URL.Path[1:]
+		id := chi.URLParam(r, "id")
+
+		fmt.Println(id)
 
 		if id == "" {
 			http.Error(w, "The query parameter ID is missing", http.StatusBadRequest)

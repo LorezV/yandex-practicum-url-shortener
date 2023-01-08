@@ -75,7 +75,7 @@ func TestURLHandler(t *testing.T) {
 		{
 			name:    "Test POST request with empty body.",
 			urls:    []storage.URL{},
-			request: "http://127.0.0.1:8080/xhxKQF",
+			request: "http://127.0.0.1:8080/",
 			method:  http.MethodPost,
 			body:    "",
 			want: want{
