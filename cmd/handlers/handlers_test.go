@@ -162,12 +162,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	resp, err := client.Do(req)
 	require.NoError(t, err)
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic("Can't close request body!")
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
