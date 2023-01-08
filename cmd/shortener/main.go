@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	storage.Repository = *storage.MakeRepository()
+	storage.Repository = storage.MakeRepository()
 	http.HandleFunc("/", handlers.URLHandler)
 	http.ListenAndServe(":8080", nil)
 }
