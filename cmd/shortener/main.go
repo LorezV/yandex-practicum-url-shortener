@@ -14,12 +14,10 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Get("/{id}", handlers.URLHandler)
-	r.Post("/", handlers.URLHandler)
 
 	r.Route("/", func(r chi.Router) {
-		r.Get("/{id}", handlers.URLHandler)
-		r.Post("/", handlers.URLHandler)
+		r.Get("/{id}", handlers.GetURL)
+		r.Post("/", handlers.CreateURL)
 	})
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
