@@ -150,7 +150,7 @@ func TestCreateURL(t *testing.T) {
 	}
 }
 
-func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (*http.Response, body string) {
+func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (*http.Response, string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
 	require.NoError(t, err)
 
