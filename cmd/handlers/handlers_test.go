@@ -99,7 +99,7 @@ func TestURLHandler(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
-			resp := testRequest(t, ts, http.MethodGet, tt.path, nil)
+			resp, _ := testRequest(t, ts, http.MethodGet, tt.path, nil)
 
 			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
 			assert.Equal(t, tt.want.location, resp.Header.Get("Location"))
@@ -143,7 +143,7 @@ func TestCreateURL(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
-			resp := testRequest(t, ts, http.MethodPost, tt.path, strings.NewReader(tt.body))
+			resp, _ := testRequest(t, ts, http.MethodPost, tt.path, strings.NewReader(tt.body))
 
 			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
 		})
