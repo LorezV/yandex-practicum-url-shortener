@@ -150,7 +150,7 @@ func TestCreateURL(t *testing.T) {
 	}
 }
 
-func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) *http.Response {
+func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (*http.Response, body string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
 	require.NoError(t, err)
 
@@ -162,7 +162,10 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	resp, err := client.Do(req)
 	require.NoError(t, err)
 
+	respBody, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+
 	defer resp.Body.Close()
 
-	return resp
+	return resp, string(respBody)
 }
