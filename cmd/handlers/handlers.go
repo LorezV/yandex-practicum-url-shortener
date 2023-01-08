@@ -34,7 +34,7 @@ func URLHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		id := chi.URLParam(r, "id")
 
-		fmt.Println(id)
+		fmt.Println(r.URL)
 
 		if id == "" {
 			http.Error(w, "The query parameter ID is missing", http.StatusBadRequest)
