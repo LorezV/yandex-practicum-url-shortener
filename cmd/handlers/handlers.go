@@ -22,7 +22,7 @@ func URLHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		id := utils.GenerateID()
-		url := storage.URL{Id: id, Original: string(b), Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
+		url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
 
 		if storage.Repository.Add(url) {
 			w.WriteHeader(http.StatusCreated)

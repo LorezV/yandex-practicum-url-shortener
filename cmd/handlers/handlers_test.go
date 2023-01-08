@@ -28,7 +28,7 @@ func TestURLHandler(t *testing.T) {
 			name: "Test GET request with exiting url in repository.",
 			urls: []storage.URL{
 				{
-					Id:       "xhxKQF",
+					ID:       "xhxKQF",
 					Original: "https://practicum.yandex.ru",
 					Short:    "http://127.0.0.1:8080/xhxKQF",
 				},

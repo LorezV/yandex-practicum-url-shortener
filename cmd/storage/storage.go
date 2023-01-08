@@ -7,7 +7,7 @@ func MakeRepository() URLRepository {
 }
 
 type URL struct {
-	Id       string
+	ID       string
 	Original string
 	Short    string
 }
@@ -32,9 +32,9 @@ func (r URLRepository) Get(id string) (URL, bool) {
 }
 
 func (r URLRepository) Add(url URL) bool {
-	_, ok := r.storage[url.Id]
+	_, ok := r.storage[url.ID]
 	if !ok {
-		r.storage[url.Id] = url
+		r.storage[url.ID] = url
 	}
 	return !ok
 }
