@@ -4,7 +4,6 @@ import (
 	"github.com/LorezV/url-shorter.git/cmd/handlers"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -96,7 +95,6 @@ func TestURLHandler(t *testing.T) {
 			}
 
 			r := chi.NewRouter()
-			r.Use(middleware.Logger)
 			r.Get("/{id}", handlers.GetURL)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
