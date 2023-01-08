@@ -1,9 +1,9 @@
 package storage
 
-var Repository URLRepository
+var Repository *URLRepository
 
-func MakeRepository() URLRepository {
-	return URLRepository{storage: make(map[string]URL)}
+func MakeRepository() *URLRepository {
+	return &URLRepository{storage: make(map[string]URL)}
 }
 
 type URL struct {
