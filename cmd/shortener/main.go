@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/storage"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/LorezV/url-shorter.git/cmd/handlers"
+	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
 func main() {

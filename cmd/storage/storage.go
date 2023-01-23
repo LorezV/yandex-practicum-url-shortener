@@ -16,16 +16,6 @@ type URLRepository struct {
 	storage map[string]URL
 }
 
-func (r URLRepository) GetAll() []URL {
-	b := make([]URL, len(r.storage))
-	i := 0
-	for _, value := range r.storage {
-		b[i] = value
-		i++
-	}
-	return b
-}
-
 func (r URLRepository) Get(id string) (URL, bool) {
 	val, ok := r.storage[id]
 	return val, ok

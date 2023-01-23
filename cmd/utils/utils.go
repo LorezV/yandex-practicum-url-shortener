@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"math/rand"
+
+	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
 func GenerateID() string {

@@ -1,16 +1,18 @@
 package handlers_test
 
 import (
-	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/storage"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/LorezV/url-shorter.git/cmd/handlers"
+	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
 func TestURLHandler(t *testing.T) {
