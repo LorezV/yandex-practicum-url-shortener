@@ -45,7 +45,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data struct {
-		Url string `json:"url"`
+		URL string `json:"url"`
 	}
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -53,13 +53,13 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(data.Url) == 0 {
+	if len(data.URL) == 0 {
 		http.Error(w, "Request json body must contain url parameter!", http.StatusBadRequest)
 		return
 	}
 
 	id := utils.GenerateID()
-	url := storage.URL{ID: id, Original: data.Url, Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
+	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
 
 	if storage.Repository.Add(url) {
 		res, _ := json.Marshal(struct {
@@ -85,6 +85,6 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Location", url.Original)
 		w.WriteHeader(307)
 	} else {
-		http.Error(w, "Url with this id not found!", http.StatusNotFound)
+		http.Error(w, "URL with this id not found!", http.StatusNotFound)
 	}
 }
