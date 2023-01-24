@@ -3,10 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
@@ -62,12 +61,12 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
 
 	if storage.Repository.Add(url) {
-		res, _ := json.Marshal(struct {
+		rBody, _ := json.Marshal(struct {
 			Response string `json:"response"`
 		}{Response: url.Short})
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		w.Write(res)
+		w.Write(rBody)
 	} else {
 		http.Error(w, "Can't add new url to storage.", http.StatusInternalServerError)
 	}
@@ -75,6 +74,8 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 
 func GetURL(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
+	fmt.Println(id)
 
 	if id == "" {
 		http.Error(w, "The query parameter ID is missing", http.StatusBadRequest)
