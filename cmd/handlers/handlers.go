@@ -75,8 +75,6 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 func GetURL(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	fmt.Println(id)
-
 	if id == "" {
 		http.Error(w, "The query parameter ID is missing", http.StatusBadRequest)
 		return
