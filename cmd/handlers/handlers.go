@@ -53,10 +53,10 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//if len(data.URL) == 0 {
-	//	http.Error(w, "Request json body must contain url parameter!", http.StatusBadRequest)
-	//	return
-	//}
+	if len(data.URL) == 0 {
+		http.Error(w, "Request json body must contain url parameter!", http.StatusBadRequest)
+		return
+	}
 
 	id := utils.GenerateID()
 	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
