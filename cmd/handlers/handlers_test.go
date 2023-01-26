@@ -130,61 +130,61 @@ func TestCreateURL(t *testing.T) {
 }
 
 func TestCreateURLJson(t *testing.T) {
-	//type want struct {
-	//	statusCode int
-	//	location   string
-	//}
-	//tests := []struct {
-	//	name string
-	//	path string
-	//	body string
-	//	want want
-	//}{
-	//	{
-	//		name: "Test POST request with valid body.",
-	//		path: "/api/shorten",
-	//		body: `{"url":"https://practicum.yandex.ru"}`,
-	//		want: want{
-	//			statusCode: http.StatusCreated,
-	//		},
-	//	},
-	//	{
-	//		name: "Test POST request with empty url parameter in body.",
-	//		path: "/api/shorten",
-	//		body: "{\"url\":\"\"}",
-	//		want: want{
-	//			statusCode: http.StatusBadRequest,
-	//		},
-	//	}, {
-	//		name: "Test POST request with invalid json.",
-	//		path: "/api/shorten",
-	//		body: "{\"url\":https://practicum.yandex.ru\"}",
-	//		want: want{
-	//			statusCode: http.StatusBadRequest,
-	//		},
-	//	},
-	//	{
-	//		name: "Test POST request with empty body.",
-	//		path: "/api/shorten",
-	//		body: "",
-	//		want: want{
-	//			statusCode: http.StatusBadRequest,
-	//		},
-	//	},
-	//}
-	//
-	//for _, tt := range tests {
-	//	t.Run(tt.name, func(t *testing.T) {
-	//		r := chi.NewRouter()
-	//		r.Post("/api/shorten", handlers.CreateURLJson)
-	//		ts := httptest.NewServer(r)
-	//		defer ts.Close()
-	//
-	//		resp, _ := testRequest(t, ts, http.MethodPost, tt.path, strings.NewReader(tt.body))
-	//
-	//		assert.Equal(t, tt.want.statusCode, resp.StatusCode)
-	//	})
-	//}
+	type want struct {
+		statusCode int
+		location   string
+	}
+	tests := []struct {
+		name string
+		path string
+		body string
+		want want
+	}{
+		{
+			name: "Test POST request with valid body.",
+			path: "/api/shorten",
+			body: `{"url":"https://practicum.yandex.ru"}`,
+			want: want{
+				statusCode: http.StatusCreated,
+			},
+		},
+		{
+			name: "Test POST request with empty url parameter in body.",
+			path: "/api/shorten",
+			body: "{\"url\":\"\"}",
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		}, {
+			name: "Test POST request with invalid json.",
+			path: "/api/shorten",
+			body: `{"url:"https://practicum.yandex.ru"}`,
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
+		{
+			name: "Test POST request with empty body.",
+			path: "/api/shorten",
+			body: "",
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := chi.NewRouter()
+			r.Post("/api/shorten", handlers.CreateURLJson)
+			ts := httptest.NewServer(r)
+			defer ts.Close()
+
+			resp, _ := testRequest(t, ts, http.MethodPost, tt.path, strings.NewReader(tt.body))
+
+			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
+		})
+	}
 }
 
 func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (http.Response, string) {
