@@ -189,6 +189,7 @@ func TestCreateURLJson(t *testing.T) {
 
 func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (http.Response, string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
+	req.Header.Set("Content-Type", "application/json")
 	require.NoError(t, err)
 
 	client := &http.Client{
