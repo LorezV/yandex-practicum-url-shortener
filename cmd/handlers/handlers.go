@@ -74,10 +74,10 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 
 	if storage.Repository.Add(url) {
 		type ResponseData struct {
-			Response string `json:"response"`
+			Result string `json:"result"`
 		}
 
-		responseBody, err := json.Marshal(ResponseData{Response: url.Short})
+		responseBody, err := json.Marshal(ResponseData{Result: url.Short})
 
 		if err != nil {
 			http.Error(w, "Can't send response.", http.StatusInternalServerError)
