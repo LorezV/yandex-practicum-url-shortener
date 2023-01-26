@@ -38,6 +38,11 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Can't handle non json data.", http.StatusBadRequest)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, "Can,t read body.", http.StatusBadRequest)
 		return
