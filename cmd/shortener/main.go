@@ -22,5 +22,7 @@ func main() {
 		r.Post("/", handlers.CreateURL)
 	})
 
+	r.Post("/api/shorten", handlers.CreateURLJson)
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

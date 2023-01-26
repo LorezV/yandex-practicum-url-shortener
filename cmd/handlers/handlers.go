@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"io"
@@ -31,6 +32,56 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(url.Short))
 	} else {
 		http.Error(w, "Can't add new url to storage.", http.StatusInternalServerError)
+	}
+}
+
+func CreateURLJson(w http.ResponseWriter, r *http.Request) {
+	b, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		http.Error(w, "Can,t read body.", http.StatusBadRequest)
+		return
+	}
+
+	if len(string(b)) == 0 {
+		http.Error(w, "Can't handle empty body.", http.StatusBadRequest)
+		return
+	}
+
+	var data struct {
+		URL string `json:"url"`
+	}
+
+	jsonErr := json.Unmarshal(b, &data)
+
+	if jsonErr != nil {
+		http.Error(w, "Can't unmarshal json from body.", http.StatusBadRequest)
+		return
+	}
+
+	if len(data.URL) == 0 {
+		http.Error(w, "Can't handle empty url parameter in body.", http.StatusBadRequest)
+		return
+	}
+
+	id := utils.GenerateID()
+	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
+
+	if storage.Repository.Add(url) {
+		type ResponseData struct {
+			Response string `json:"response"`
+		}
+
+		responseBody, err := json.Marshal(ResponseData{Response: url.Short})
+
+		if err != nil {
+			http.Error(w, "Can't send response.", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		w.Write(responseBody)
 	}
 }
 
