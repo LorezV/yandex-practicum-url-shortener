@@ -22,9 +22,5 @@ func main() {
 		r.Post("/", handlers.CreateURL)
 	})
 
-	r.Route("/api", func(r chi.Router) {
-		r.Post("/shorten", handlers.CreateURLJson)
-	})
-
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
