@@ -3,11 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/LorezV/url-shorter.git/cmd/config"
-	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
+	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
 )

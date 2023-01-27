@@ -3,9 +3,10 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/LorezV/url-shorter.git/cmd/config"
 	"log"
 	"os"
+
+	"github.com/LorezV/url-shorter.git/cmd/config"
 )
 
 var Repository URLRepository
@@ -17,12 +18,12 @@ type URLRepository struct {
 func MakeRepository() URLRepository {
 	repository := URLRepository{storage: make(map[string]URL)}
 
-	if len(config.AppConfig.FileStoragePath) > 0 {
-		err := repository.Load()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	//if len(config.AppConfig.FileStoragePath) > 0 {
+	//	err := repository.Load()
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}
 
 	return repository
 }

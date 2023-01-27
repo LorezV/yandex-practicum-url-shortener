@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/LorezV/url-shorter.git/cmd/config"
 	"log"
 	"math/rand"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/handlers"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
