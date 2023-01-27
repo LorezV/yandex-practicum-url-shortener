@@ -28,7 +28,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 	id := utils.GenerateID()
 	url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id)}
 
-	if storage.Repository.Add(url) {
+	if storage.Repository.Save(url) {
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(url.Short))
 	} else {
@@ -68,7 +68,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	id := utils.GenerateID()
 	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id)}
 
-	if storage.Repository.Add(url) {
+	if storage.Repository.Save(url) {
 		type ResponseData struct {
 			Result string `json:"result"`
 		}
