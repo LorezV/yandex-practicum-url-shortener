@@ -3,7 +3,6 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"log"
 	"os"
@@ -65,7 +64,7 @@ func (r URLRepository) Save(url URL) bool {
 		file, err := os.OpenFile(config.AppConfig.FileStoragePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
 
 		if err != nil {
-			log.Fatal(fmt.Sprintf("Can't open file by path %s", "path"))
+			log.Fatalf("Can't open file by path %s", "path")
 			return false
 		}
 
