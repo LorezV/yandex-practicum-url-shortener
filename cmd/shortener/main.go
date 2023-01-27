@@ -16,7 +16,12 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	config.LoadAppConfig()
+
+	err := config.LoadAppConfig()
+	if err != nil {
+		panic(err)
+	}
+
 	storage.Repository = storage.MakeRepository()
 
 	r := chi.NewRouter()
