@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -14,16 +16,24 @@ import (
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
-func main() {
+func init() {
 	rand.Seed(time.Now().UnixNano())
-
 	err := config.LoadAppConfig()
 	if err != nil {
 		panic(err)
 	}
 
+	flag.StringVar(&config.AppConfig.ServerAddress, "a", config.AppConfig.ServerAddress, "ip:port")
+	flag.StringVar(&config.AppConfig.BaseURL, "b", config.AppConfig.BaseURL, "protocol://ip:port")
+	flag.StringVar(&config.AppConfig.FileStoragePath, "f", config.AppConfig.FileStoragePath, "Path to file")
+}
+
+func main() {
+	flag.Parse()
 	storage.Repository = storage.MakeRepository()
 
+	fmt.Println(config.AppConfig.ServerAddress)
+	
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
