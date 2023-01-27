@@ -19,19 +19,27 @@ func MakeRepository() URLRepository {
 	repository := URLRepository{storage: make(map[string]URL)}
 
 	if len(config.AppConfig.FileStoragePath) > 0 {
-		repository.Load()
+		err := repository.Load()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return repository
 }
 
-func (r URLRepository) Load() {
-	file, err := os.OpenFile(config.AppConfig.FileStoragePath, os.O_RDONLY, 0777)
+func (r URLRepository) Load() (err error) {
+	var file *os.File
+	file, err = os.OpenFile(config.AppConfig.FileStoragePath, os.O_RDONLY, 0777)
 
-	defer file.Close()
+	defer func() {
+		cerr := file.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Can't open file by path %s", config.AppConfig.FileStoragePath))
 		return
 	}
 
@@ -39,21 +47,17 @@ func (r URLRepository) Load() {
 
 	for scanner.Scan() {
 		var url URL
+		err = json.Unmarshal([]byte(scanner.Text()), &url)
 
-		if json.Unmarshal([]byte(scanner.Text()), &url) != nil {
-			log.Fatal(fmt.Sprintf("Can't unmarshal %s", scanner.Text()))
+		if err != nil {
 			return
 		}
 
-		if !r.Add(url) {
-			log.Fatal("Can't add url to repository.")
-			return
-		}
+		r.Add(url)
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	err = scanner.Err()
+	return
 }
 
 func (r URLRepository) Save(url URL) bool {
