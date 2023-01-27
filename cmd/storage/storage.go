@@ -26,7 +26,7 @@ func MakeRepository() URLRepository {
 }
 
 func (r URLRepository) Load() {
-	file, err := os.OpenFile(config.AppConfig.FileStoragePath, os.O_RDONLY, 644)
+	file, err := os.OpenFile(config.AppConfig.FileStoragePath, os.O_RDONLY, 0777)
 
 	defer file.Close()
 
@@ -58,7 +58,7 @@ func (r URLRepository) Load() {
 
 func (r URLRepository) Save(url URL) bool {
 	if len(config.AppConfig.FileStoragePath) > 0 {
-		file, err := os.OpenFile(config.AppConfig.FileStoragePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 644)
+		file, err := os.OpenFile(config.AppConfig.FileStoragePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
 
 		if err != nil {
 			log.Fatal(fmt.Sprintf("Can't open file by path %s", "path"))
