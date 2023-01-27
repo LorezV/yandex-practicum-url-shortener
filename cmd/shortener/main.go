@@ -1,8 +1,11 @@
 package main
 
 import (
+	"github.com/LorezV/url-shorter.git/cmd/config"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,7 +15,10 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+	config.LoadAppConfig()
 	storage.Repository = storage.MakeRepository()
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -24,5 +30,5 @@ func main() {
 
 	r.Post("/api/shorten", handlers.CreateURLJson)
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
 }

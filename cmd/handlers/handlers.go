@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
@@ -25,7 +26,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := utils.GenerateID()
-	url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
+	url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("%s%s", config.AppConfig.BaseUrl, id)}
 
 	if storage.Repository.Add(url) {
 		w.WriteHeader(http.StatusCreated)
@@ -65,7 +66,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := utils.GenerateID()
-	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("http://%s/%s", r.Host, id)}
+	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("%s%s", config.AppConfig.BaseUrl, id)}
 
 	if storage.Repository.Add(url) {
 		type ResponseData struct {
