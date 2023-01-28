@@ -1,17 +1,14 @@
 package handlers
 
 import (
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"io"
-	"net/http"
-	"strings"
-
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
+	"github.com/go-chi/chi/v5"
+	"io"
+	"net/http"
 )
 
 func CreateURL(w http.ResponseWriter, r *http.Request) {
@@ -39,26 +36,9 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
-	var b []byte
-	var error error
-
-	if strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {
-		reader, err := gzip.NewReader(r.Body)
-		if err != nil {
-			http.Error(w, "Can't decompress gzip data.", http.StatusBadRequest)
-			return
-		}
-
-		defer reader.Close()
-
-		b, error = io.ReadAll(reader)
-	} else {
-		b, error = io.ReadAll(r.Body)
-	}
-
-	fmt.Println(string(b))
-
-	if error != nil {
+	b, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
 		http.Error(w, "Can't read body.", http.StatusBadRequest)
 		return
 	}
