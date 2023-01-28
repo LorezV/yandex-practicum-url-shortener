@@ -75,7 +75,6 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		}
 
 		responseBody, err := json.Marshal(ResponseData{Result: url.Short})
-		responseBody = []byte(fmt.Sprintf("%s\n%s\n%s", responseBody, responseBody, responseBody))
 
 		if err != nil {
 			http.Error(w, "Can't send response.", http.StatusInternalServerError)
