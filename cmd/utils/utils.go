@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"io"
 	"math/rand"
+	"net/http"
 
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
@@ -20,4 +22,22 @@ func GenerateID() string {
 	}
 
 	return string(id)
+}
+
+type GzipWriter struct {
+	http.ResponseWriter
+	Writer io.Writer
+}
+
+func (w GzipWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+type GzipReader struct {
+	io.ReadCloser
+	Reader io.Reader
+}
+
+func (g GzipReader) Read(p []byte) (n int, err error) {
+	return g.Reader.Read(p)
 }

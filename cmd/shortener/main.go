@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"github.com/LorezV/url-shorter.git/cmd/middlewares"
 	"log"
 	"math/rand"
 	"net/http"
@@ -32,8 +32,6 @@ func main() {
 	flag.Parse()
 	storage.Repository = storage.MakeRepository()
 
-	fmt.Println(config.AppConfig.ServerAddress)
-	
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -43,7 +41,10 @@ func main() {
 		r.Post("/", handlers.CreateURL)
 	})
 
-	r.Post("/api/shorten", handlers.CreateURLJson)
+	r.Route("/api", func(r chi.Router) {
+		r.Use(middlewares.GzipHandle)
+		r.Post("/shorten", handlers.CreateURLJson)
+	})
 
 	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
 }
