@@ -40,7 +40,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	var b []byte
-	var err error
+	var error error
 
 	if strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {
 		reader, err := gzip.NewReader(r.Body)
@@ -51,12 +51,12 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 
 		defer reader.Close()
 
-		b, err = io.ReadAll(reader)
+		b, error = io.ReadAll(reader)
 	} else {
-		b, err = io.ReadAll(r.Body)
+		b, error = io.ReadAll(r.Body)
 	}
 
-	if err != nil {
+	if error != nil {
 		http.Error(w, "Can,t read body.", http.StatusBadRequest)
 		return
 	}
