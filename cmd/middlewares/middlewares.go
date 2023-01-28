@@ -2,10 +2,11 @@ package middlewares
 
 import (
 	"compress/gzip"
-	"github.com/LorezV/url-shorter.git/cmd/utils"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/LorezV/url-shorter.git/cmd/utils"
 )
 
 func GzipHandle(next http.Handler) http.Handler {

@@ -36,6 +36,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middlewares.GzipHandle)
+
 	r.Route("/", func(r chi.Router) {
 		r.Get("/{id}", handlers.GetURL)
 		r.Post("/", handlers.CreateURL)

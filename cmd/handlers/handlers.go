@@ -3,12 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
-	"github.com/go-chi/chi/v5"
-	"io"
-	"net/http"
 )
 
 func CreateURL(w http.ResponseWriter, r *http.Request) {

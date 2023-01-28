@@ -32,12 +32,3 @@ type GzipWriter struct {
 func (w GzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
-
-type GzipReader struct {
-	io.ReadCloser
-	Reader io.Reader
-}
-
-func (g GzipReader) Read(p []byte) (n int, err error) {
-	return g.Reader.Read(p)
-}
