@@ -56,8 +56,10 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		b, error = io.ReadAll(r.Body)
 	}
 
+	fmt.Println(string(b))
+
 	if error != nil {
-		http.Error(w, "Can,t read body.", http.StatusBadRequest)
+		http.Error(w, "Can't read body.", http.StatusBadRequest)
 		return
 	}
 
