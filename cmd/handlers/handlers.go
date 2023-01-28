@@ -37,7 +37,9 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
+
 	defer r.Body.Close()
+
 	if err != nil {
 		http.Error(w, "Can't read body.", http.StatusBadRequest)
 		return
