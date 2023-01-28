@@ -19,7 +19,8 @@ func GzipHandle(next http.Handler) http.Handler {
 				return
 			}
 
-			r.Body = utils.GzipReader{Reader: gz}
+			r.Body = gz
+			defer gz.Close()
 		}
 
 		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
