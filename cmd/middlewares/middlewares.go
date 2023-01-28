@@ -10,10 +10,6 @@ import (
 
 func GzipHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {
-			
-		}
-
 		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			//	Заменяем Writer на GzipWriter
 			gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
