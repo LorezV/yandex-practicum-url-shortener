@@ -1,16 +1,18 @@
 package handlers_test
 
 import (
-	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/storage"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/LorezV/url-shorter.git/cmd/handlers"
+	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
 func TestURLHandler(t *testing.T) {
@@ -63,28 +65,6 @@ func TestURLHandler(t *testing.T) {
 				location:   "",
 			},
 		},
-		//{
-		//	name:    "Test POST path.",
-		//	urls:    []storage.URL{},
-		//	path: "http://127.0.0.1:8080/",
-		//	method:  http.MethodPost,
-		//	body:    "https://practicum.yandex.ru",
-		//	want: want{
-		//		statusCode: http.StatusCreated,
-		//		location:   "",
-		//	},
-		//},
-		//{
-		//	name:    "Test POST path with empty body.",
-		//	urls:    []storage.URL{},
-		//	path: "http://127.0.0.1:8080/",
-		//	method:  http.MethodPost,
-		//	body:    "",
-		//	want: want{
-		//		statusCode: http.StatusBadRequest,
-		//		location:   "",
-		//	},
-		//},
 	}
 
 	for _, tt := range tests {
@@ -110,7 +90,6 @@ func TestURLHandler(t *testing.T) {
 func TestCreateURL(t *testing.T) {
 	type want struct {
 		statusCode int
-		location   string
 	}
 	tests := []struct {
 		name string
@@ -140,6 +119,64 @@ func TestCreateURL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := chi.NewRouter()
 			r.Post("/", handlers.CreateURL)
+			ts := httptest.NewServer(r)
+			defer ts.Close()
+
+			resp, _ := testRequest(t, ts, http.MethodPost, tt.path, strings.NewReader(tt.body))
+
+			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
+		})
+	}
+}
+
+func TestCreateURLJson(t *testing.T) {
+	type want struct {
+		statusCode int
+		location   string
+	}
+	tests := []struct {
+		name string
+		path string
+		body string
+		want want
+	}{
+		{
+			name: "Test POST request with valid body.",
+			path: "/api/shorten",
+			body: `{"url":"https://practicum.yandex.ru"}`,
+			want: want{
+				statusCode: http.StatusCreated,
+			},
+		},
+		{
+			name: "Test POST request with empty url parameter in body.",
+			path: "/api/shorten",
+			body: "{\"url\":\"\"}",
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		}, {
+			name: "Test POST request with invalid json.",
+			path: "/api/shorten",
+			body: `{"url:"https://practicum.yandex.ru"}`,
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
+		{
+			name: "Test POST request with empty body.",
+			path: "/api/shorten",
+			body: "",
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := chi.NewRouter()
+			r.Post("/api/shorten", handlers.CreateURLJson)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 

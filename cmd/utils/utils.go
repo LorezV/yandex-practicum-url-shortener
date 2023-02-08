@@ -1,8 +1,11 @@
 package utils
 
 import (
-	"github.com/LorezV/url-shorter.git/cmd/storage"
+	"io"
 	"math/rand"
+	"net/http"
+
+	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
 func GenerateID() string {
@@ -19,4 +22,13 @@ func GenerateID() string {
 	}
 
 	return string(id)
+}
+
+type GzipWriter struct {
+	http.ResponseWriter
+	Writer io.Writer
+}
+
+func (w GzipWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
 }
