@@ -31,7 +31,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := r.Context().Value("userID").(string)
+	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id), UserID: userID}
 
 	if storage.Repository.Save(url) {
@@ -78,7 +78,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 		return
 	}
-	userID := r.Context().Value("userID").(string)
+	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id), UserID: userID}
 
 	if storage.Repository.Save(url) {
@@ -116,7 +116,7 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserUrls(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(string)
+	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	b := storage.Repository.GetAllByUser(userID)
 
 	if len(b) > 0 {

@@ -79,12 +79,12 @@ func (r URLRepository) Get(id string) (URL, bool) {
 	return val, ok
 }
 
-func (r URLRepository) GetAllByUser(userId string) []URL {
+func (r URLRepository) GetAllByUser(userID string) []URL {
 	result := make([]URL, len(r.storage))
 	i := 0
 
 	for _, value := range r.storage {
-		if value.UserID == userId {
+		if value.UserID == userID {
 			result[i] = value
 			i++
 		}

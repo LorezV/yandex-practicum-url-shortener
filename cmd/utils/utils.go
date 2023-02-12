@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+type ContextKey string
+
 func GenerateID() (string, error) {
 	b, err := GenerateRandom(4)
 	if err != nil {

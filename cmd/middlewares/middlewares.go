@@ -95,7 +95,7 @@ func Authorization(next http.Handler) http.Handler {
 			userID = id
 		}
 
-		r = r.WithContext(context.WithValue(r.Context(), "userID", userID))
+		r = r.WithContext(context.WithValue(r.Context(), utils.ContextKey("userID"), userID))
 		next.ServeHTTP(w, r)
 	})
 }
