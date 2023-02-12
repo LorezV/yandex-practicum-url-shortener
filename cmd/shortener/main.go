@@ -36,12 +36,14 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middlewares.GzipHandle)
+	r.Use(middlewares.Authorization)
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/{id}", handlers.GetURL)
 		r.Post("/", handlers.CreateURL)
 	})
 	r.Post("/api/shorten", handlers.CreateURLJson)
+	r.Get("/api/user/urls", handlers.GetUserUrls)
 
 	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
 }

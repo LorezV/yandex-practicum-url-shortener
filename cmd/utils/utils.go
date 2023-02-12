@@ -1,27 +1,32 @@
 package utils
 
 import (
+	"encoding/hex"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
-
-	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
-func GenerateID() string {
-	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	id := make([]rune, 6)
-	for i := range id {
-		id[i] = runes[rand.Intn(len(runes))]
+func GenerateID() (string, error) {
+	b, err := GenerateRandom(4)
+	if err != nil {
+		log.Fatal(err)
+		return "", err
 	}
 
-	// Простая проверка на уникальность
-	_, ok := storage.Repository.Get(string(id))
-	if ok {
-		return GenerateID()
+	return hex.EncodeToString(b), nil
+}
+
+func GenerateRandom(size int) ([]byte, error) {
+	// генерируем случайную последовательность байт
+	b := make([]byte, size)
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
 	}
 
-	return string(id)
+	return b, nil
 }
 
 type GzipWriter struct {

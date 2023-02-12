@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"github.com/LorezV/url-shorter.git/cmd/middlewares"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -33,6 +34,7 @@ func TestURLHandler(t *testing.T) {
 					ID:       "xhxKQF",
 					Original: "https://practicum.yandex.ru",
 					Short:    "http://127.0.0.1:8080/xhxKQF",
+					UserId:   "",
 				},
 			},
 			path: "/xhxKQF",
@@ -57,6 +59,7 @@ func TestURLHandler(t *testing.T) {
 					ID:       "ASKTTG",
 					Original: "https://practicum.yandex.ru",
 					Short:    "http://127.0.0.1:8080/ASKTTG",
+					UserId:   "",
 				},
 			},
 			path: "/xhxKQF",
@@ -75,6 +78,7 @@ func TestURLHandler(t *testing.T) {
 			}
 
 			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
 			r.Get("/{id}", handlers.GetURL)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
@@ -118,6 +122,7 @@ func TestCreateURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
 			r.Post("/", handlers.CreateURL)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
@@ -176,6 +181,7 @@ func TestCreateURLJson(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
 			r.Post("/api/shorten", handlers.CreateURLJson)
 			ts := httptest.NewServer(r)
 			defer ts.Close()

@@ -3,10 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/storage"
@@ -26,8 +25,14 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := utils.GenerateID()
-	url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id)}
+	id, e := utils.GenerateID()
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userId := r.Context().Value("userId").(string)
+	url := storage.URL{ID: id, Original: string(b), Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id), UserId: userId}
 
 	if storage.Repository.Save(url) {
 		w.WriteHeader(http.StatusCreated)
@@ -68,8 +73,13 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := utils.GenerateID()
-	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id)}
+	id, e := utils.GenerateID()
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusInternalServerError)
+		return
+	}
+	userId := r.Context().Value("userId").(string)
+	url := storage.URL{ID: id, Original: data.URL, Short: fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id), UserId: userId}
 
 	if storage.Repository.Save(url) {
 		type ResponseData struct {
@@ -103,4 +113,23 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "URL with this id not found!", http.StatusNotFound)
 	}
+}
+
+func GetUserUrls(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value("userId").(string)
+	b := storage.Repository.GetAllByUser(userId)
+
+	if len(b) > 0 {
+		j, err := json.Marshal(b)
+		if err != nil {
+			http.Error(w, "Can't marshal urls.", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(j)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

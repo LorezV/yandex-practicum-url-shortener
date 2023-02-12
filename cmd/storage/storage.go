@@ -16,16 +16,7 @@ type URLRepository struct {
 }
 
 func MakeRepository() URLRepository {
-	repository := URLRepository{storage: make(map[string]URL)}
-
-	//if len(config.AppConfig.FileStoragePath) > 0 {
-	//	err := repository.Load()
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//}
-
-	return repository
+	return URLRepository{storage: make(map[string]URL)}
 }
 
 func (r URLRepository) Load() (err error) {
@@ -88,6 +79,20 @@ func (r URLRepository) Get(id string) (URL, bool) {
 	return val, ok
 }
 
+func (r URLRepository) GetAllByUser(userId string) []URL {
+	result := make([]URL, len(r.storage))
+	i := 0
+
+	for _, value := range r.storage {
+		if value.UserId == userId {
+			result[i] = value
+			i++
+		}
+	}
+
+	return result[:i]
+}
+
 func (r URLRepository) Add(url URL) bool {
 	_, ok := r.storage[url.ID]
 	if !ok {
@@ -97,7 +102,10 @@ func (r URLRepository) Add(url URL) bool {
 }
 
 type URL struct {
-	ID       string
-	Original string
-	Short    string
+	ID       string `json:"-"`
+	Original string `json:"original_url"`
+	Short    string `json:"short_url"`
+	UserId   string `json:"-"`
 }
+
+type URLResponse = URL
