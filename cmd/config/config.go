@@ -1,13 +1,11 @@
 package config
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"github.com/caarlos0/env"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"os"
-	"time"
 )
 
 var AppConfig Config
@@ -34,7 +32,4 @@ func InitDatabase() {
 		fmt.Println("Unable to connect to database.")
 		os.Exit(1)
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
 }
