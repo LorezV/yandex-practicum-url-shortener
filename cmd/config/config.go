@@ -37,9 +37,4 @@ func InitDatabase() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-
-	if err := DB.PingContext(ctx); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 }
