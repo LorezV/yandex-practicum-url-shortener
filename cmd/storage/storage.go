@@ -84,7 +84,7 @@ func (r URLRepository) GetAllByUser(userId string) []URL {
 	i := 0
 
 	for _, value := range r.storage {
-		if value.UserId == userId {
+		if value.UserID == userId {
 			result[i] = value
 			i++
 		}
@@ -105,7 +105,7 @@ type URL struct {
 	ID       string `json:"-"`
 	Original string `json:"original_url"`
 	Short    string `json:"short_url"`
-	UserId   string `json:"-"`
+	UserID   string `json:"-"`
 }
 
 type URLResponse = URL

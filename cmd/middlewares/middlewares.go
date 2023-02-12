@@ -57,11 +57,11 @@ func Authorization(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
 			isCookieValid bool
-			userId        string
+			userID        string
 		)
 
 		isCookieValid = false
-		cookie, err := r.Cookie("userId")
+		cookie, err := r.Cookie("userID")
 
 		if err == nil {
 			id := cookie.Value[:8]
@@ -75,7 +75,7 @@ func Authorization(next http.Handler) http.Handler {
 			dst := h.Sum(nil)
 			isCookieValid = hmac.Equal(dst, sign)
 			if isCookieValid {
-				userId = id
+				userID = id
 			}
 		}
 
@@ -90,12 +90,12 @@ func Authorization(next http.Handler) http.Handler {
 			h.Write([]byte(id))
 			dst := h.Sum(nil)
 			value := id + hex.EncodeToString(dst)
-			cookie = &http.Cookie{Name: "userId", Value: value, MaxAge: 36000}
+			cookie = &http.Cookie{Name: "userID", Value: value, MaxAge: 36000}
 			http.SetCookie(w, cookie)
-			userId = id
+			userID = id
 		}
 
-		r = r.WithContext(context.WithValue(r.Context(), "userId", userId))
+		r = r.WithContext(context.WithValue(r.Context(), "userID", userID))
 		next.ServeHTTP(w, r)
 	})
 }
