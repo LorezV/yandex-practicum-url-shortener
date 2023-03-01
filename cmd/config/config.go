@@ -13,8 +13,8 @@ type Config struct {
 	BaseURL         string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 	SecretKey       string `env:"SECRET_KEY" envDefault:"ca5ee5227ead"`
-	DatabaseDsn     string `env:"DATABASE_DSN"`
-	//DatabaseDsn string `env:"DATABASE_DSN" envDefault:"postgres://postgres:admin@localhost:5432/go-learn?sslmode=disable"`
+	//DatabaseDsn     string `env:"DATABASE_DSN"`
+	DatabaseDsn string `env:"DATABASE_DSN" envDefault:"postgres://postgres:admin@localhost:5432/go-learn?sslmode=disable"`
 }
 
 var DB *sql.DB

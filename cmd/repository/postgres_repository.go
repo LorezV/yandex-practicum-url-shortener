@@ -37,7 +37,7 @@ func MakePostgresRepository() Repository {
 	var repository = PostgresRepository{database: config.DB}
 
 	_, connErr := repository.database.Exec(`
-CREATE TABLE "url" (
+CREATE TABLE IF NOT EXISTS "url" (
 	"id" VARCHAR(12) NOT NULL,
 	"short" VARCHAR(128) NOT NULL,
 	"original" VARCHAR(128) NOT NULL,
