@@ -94,10 +94,14 @@ func (r PostgresRepository) GetAllByUser(userID string) ([]URL, error) {
 	var count int
 	e := r.database.QueryRow(`SELECT COUNT(*) FROM url WHERE user_id=$1`, userID).Scan(&count)
 	if e != nil {
-		return make([]URL, 1), e
+		return nil, e
 	}
 
 	rows, err := r.database.Query(`SELECT id, short, original, user_id FROM url WHERE user_id=$1`, userID)
+	if err != nil {
+		return nil, err
+	}
+	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}
