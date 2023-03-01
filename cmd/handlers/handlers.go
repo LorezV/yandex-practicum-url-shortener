@@ -165,3 +165,71 @@ func CheckPing(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+
+func BatchURLJson(w http.ResponseWriter, r *http.Request) {
+	b, err := io.ReadAll(r.Body)
+
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var requestData []struct {
+		CorrelationID string `json:"correlation_id"`
+		OriginalURL   string `json:"original_url"`
+	}
+
+	err = json.Unmarshal(b, &requestData)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(requestData) == 0 {
+		http.Error(w, "Can't handle empty url array in body.", http.StatusBadRequest)
+		return
+	}
+
+	type ResponseDataElement struct {
+		CorrelationID string `json:"correlation_id"`
+		ShortURL      string `json:"short_url"`
+	}
+
+	var responseData = make([]ResponseDataElement, len(requestData))
+
+	userID := r.Context().Value(utils.ContextKey("userID")).(string)
+
+	for index, element := range requestData {
+		var (
+			error error
+			url   repository.URL
+		)
+		url, error = repository.MakeURL(element.OriginalURL, userID)
+		if error != nil {
+			http.Error(w, error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		url, error = repository.GlobalRepository.Save(url)
+		if error != nil {
+			http.Error(w, error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		responseData[index] = ResponseDataElement{CorrelationID: element.CorrelationID, ShortURL: url.Short}
+	}
+
+	responseBody, marshalError := json.Marshal(responseData)
+
+	if marshalError != nil {
+		http.Error(w, marshalError.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(responseBody)
+}

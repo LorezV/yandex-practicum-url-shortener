@@ -47,6 +47,7 @@ func main() {
 		r.Get("/{id}", handlers.GetURL)
 		r.Post("/", handlers.CreateURL)
 	})
+	r.Post("/api/shorten/batch", handlers.BatchURLJson)
 	r.Post("/api/shorten", handlers.CreateURLJson)
 	r.Get("/api/user/urls", handlers.GetUserUrls)
 	r.Get("/ping", handlers.CheckPing)
