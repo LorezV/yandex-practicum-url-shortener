@@ -124,7 +124,6 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	b, e := repository.GlobalRepository.GetAllByUser(userID)
 
 	if e != nil {
-		fmt.Println("1 error")
 		http.Error(w, "Can't get urls from repository.", http.StatusInternalServerError)
 		return
 	}
@@ -142,7 +141,6 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 
 		j, err := json.Marshal(v)
 		if err != nil {
-			fmt.Println("2 error")
 			http.Error(w, "Can't marshal json.", http.StatusInternalServerError)
 			return
 		}
@@ -151,7 +149,7 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 		w.Write(j)
 		return
 	}
-
+	fmt.Println("return no content")
 	w.WriteHeader(http.StatusNoContent)
 }
 
