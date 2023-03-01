@@ -6,6 +6,7 @@ import (
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type MemoryRepository struct {
@@ -31,7 +32,10 @@ func MakeMemoryRepository() Repository {
 
 func (r MemoryRepository) LoadFromFile() (err error) {
 	var file *os.File
-	file, err = os.OpenFile(r.filePath, os.O_RDONLY, 0777)
+	var path string
+
+	path, err = filepath.Abs(r.filePath)
+	file, err = os.OpenFile(path, os.O_RDONLY, 0777)
 
 	defer func() {
 		cerr := file.Close()
