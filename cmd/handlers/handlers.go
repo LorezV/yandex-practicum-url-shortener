@@ -123,14 +123,14 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	b, e := repository.GlobalRepository.GetAllByUser(userID)
 
 	if e != nil {
-		http.Error(w, e.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
 	if len(b) > 0 {
 		type ResponseElement struct {
-			OriginalURL string `json:"original_url"`
 			ShortURL    string `json:"short_url"`
+			OriginalURL string `json:"original_url"`
 		}
 		v := make([]ResponseElement, len(b))
 
@@ -140,7 +140,7 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 
 		j, err := json.Marshal(v)
 		if err != nil {
-			http.Error(w, "Can't marshal urls.", http.StatusInternalServerError)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
