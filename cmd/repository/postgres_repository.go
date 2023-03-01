@@ -20,6 +20,8 @@ func MakePostgresRepository() Repository {
 	if err != nil {
 		fmt.Println("Unable to connect to database.")
 		os.Exit(1)
+	} else {
+		fmt.Println("Database created.")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
