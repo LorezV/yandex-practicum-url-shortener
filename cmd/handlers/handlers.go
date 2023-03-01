@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/repository"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
@@ -123,7 +124,8 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	b, e := repository.GlobalRepository.GetAllByUser(userID)
 
 	if e != nil {
-		w.WriteHeader(http.StatusNoContent)
+		fmt.Println("1 error")
+		http.Error(w, "Can't get urls from repository.", http.StatusInternalServerError)
 		return
 	}
 
@@ -140,7 +142,8 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 
 		j, err := json.Marshal(v)
 		if err != nil {
-			w.WriteHeader(http.StatusNoContent)
+			fmt.Println("2 error")
+			http.Error(w, "Can't marshal json.", http.StatusInternalServerError)
 			return
 		}
 

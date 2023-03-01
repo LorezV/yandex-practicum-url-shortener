@@ -75,7 +75,6 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 
 func (r MemoryRepository) Save(url URL) (URL, error) {
 	r.Add(url)
-	fmt.Println(url)
 
 	if len(r.filePath) > 0 {
 		file, err := os.OpenFile(r.filePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
