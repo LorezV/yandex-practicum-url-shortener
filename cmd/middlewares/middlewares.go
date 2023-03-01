@@ -52,8 +52,8 @@ func Authorization(next http.Handler) http.Handler {
 		cookie, err := r.Cookie("userID")
 
 		if err == nil {
-			id := cookie.Value[:8]
-			sign, e := hex.DecodeString(cookie.Value[8:])
+			id := cookie.Value[:12]
+			sign, e := hex.DecodeString(cookie.Value[12:])
 			if e != nil {
 				http.Error(w, "Can't decode string.", http.StatusInternalServerError)
 				return

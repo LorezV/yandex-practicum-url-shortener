@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/repository"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
@@ -149,7 +148,6 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 		w.Write(j)
 		return
 	}
-	fmt.Println("return no content")
 	w.WriteHeader(http.StatusNoContent)
 }
 
