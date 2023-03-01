@@ -33,13 +33,19 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var status = http.StatusCreated
+
 	savedURL, insertError := repository.GlobalRepository.Insert(url)
-	if insertError != nil && !errors.Is(insertError, repository.ErrorURLExists) {
-		http.Error(w, insertError.Error(), http.StatusInternalServerError)
-		return
+	if insertError != nil {
+		if errors.Is(insertError, repository.ErrorURLExists) {
+			status = http.StatusConflict
+		} else {
+			http.Error(w, insertError.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(status)
 	w.Write([]byte(savedURL.Short))
 }
 
@@ -81,10 +87,16 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var status = http.StatusCreated
+
 	savedURL, insertError := repository.GlobalRepository.Insert(url)
-	if insertError != nil && !errors.Is(insertError, repository.ErrorURLExists) {
-		http.Error(w, insertError.Error(), http.StatusInternalServerError)
-		return
+	if insertError != nil {
+		if errors.Is(insertError, repository.ErrorURLExists) {
+			status = http.StatusConflict
+		} else {
+			http.Error(w, insertError.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	type ResponseData struct {
@@ -99,7 +111,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(status)
 	w.Write(responseBody)
 }
 
