@@ -15,15 +15,18 @@ type MemoryRepository struct {
 }
 
 func MakeMemoryRepository() Repository {
-	filePath, err := filepath.Abs(config.AppConfig.FileStoragePath)
-	if err != nil {
-		log.Fatalf("Can't get absolute path of  %s", config.AppConfig.FileStoragePath)
-		return nil
-	}
-	var repository = MemoryRepository{storage: make(map[string]URL), filePath: filePath}
+	var repository = MemoryRepository{storage: make(map[string]URL)}
 
-	if len(filePath) > 0 {
-		err := repository.LoadFromFile()
+	if len(config.AppConfig.FileStoragePath) > 0 {
+		filePath, err := filepath.Abs(config.AppConfig.FileStoragePath)
+		if err != nil {
+			log.Fatalf("Can't get absolute path of  %s", config.AppConfig.FileStoragePath)
+			return nil
+		}
+
+		repository.filePath = filePath
+
+		err = repository.LoadFromFile()
 
 		if err != nil {
 			log.Fatalf("Error loading repository from file %s", config.AppConfig.FileStoragePath)
