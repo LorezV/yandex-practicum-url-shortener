@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/hex"
 	"io"
-	"log"
 	"math/rand"
 	"net/http"
 )
@@ -11,9 +10,8 @@ import (
 type ContextKey string
 
 func GenerateID() (string, error) {
-	b, err := GenerateRandom(4)
+	b, err := GenerateRandom(6)
 	if err != nil {
-		log.Fatal(err)
 		return "", err
 	}
 
@@ -21,7 +19,6 @@ func GenerateID() (string, error) {
 }
 
 func GenerateRandom(size int) ([]byte, error) {
-	// генерируем случайную последовательность байт
 	b := make([]byte, size)
 	_, err := rand.Read(b)
 	if err != nil {

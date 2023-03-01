@@ -13,7 +13,7 @@ import (
 
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/storage"
+	"github.com/LorezV/url-shorter.git/cmd/repository"
 )
 
 func init() {
@@ -31,10 +31,11 @@ func init() {
 
 func main() {
 	flag.Parse()
-	storage.Repository = storage.MakeRepository()
-
-	config.InitDatabase()
-	defer config.DB.Close()
+	if len(config.AppConfig.DatabaseDsn) > 0 {
+		repository.GlobalRepository = repository.MakePostgresRepository()
+	} else {
+		repository.GlobalRepository = repository.MakeMemoryRepository()
+	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

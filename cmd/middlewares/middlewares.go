@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto/hmac"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/LorezV/url-shorter.git/cmd/config"
@@ -40,17 +39,6 @@ func GzipHandle(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func generateRandom(size int) ([]byte, error) {
-	// генерируем случайную последовательность байт
-	b := make([]byte, size)
-	_, err := rand.Read(b)
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
 }
 
 func Authorization(next http.Handler) http.Handler {
