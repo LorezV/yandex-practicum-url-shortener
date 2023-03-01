@@ -27,12 +27,12 @@ func MakeMemoryRepository() Repository {
 
 		repository.filePath = filePath
 
-		err = repository.LoadFromFile()
-
-		if err != nil {
-			log.Fatalf(err.Error())
-			return nil
-		}
+		//err = repository.LoadFromFile()
+		//
+		//if err != nil {
+		//	log.Fatalf(err.Error())
+		//	return nil
+		//}
 	}
 
 	return repository
