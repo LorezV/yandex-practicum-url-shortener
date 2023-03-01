@@ -73,7 +73,7 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 	return
 }
 
-func (r MemoryRepository) Save(url URL) (URL, error) {
+func (r MemoryRepository) Insert(url URL) (URL, error) {
 	r.Add(url)
 
 	if len(r.filePath) > 0 {

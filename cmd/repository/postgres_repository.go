@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
+	"log"
 	"os"
 	"time"
 )
@@ -36,44 +37,35 @@ func MakePostgresRepository() Repository {
 
 	var repository = PostgresRepository{database: config.DB}
 
-	_, connErr := repository.database.Exec(`
+	_, seedError := repository.database.Exec(`
 CREATE TABLE IF NOT EXISTS "url" (
 	"id" VARCHAR(12) NOT NULL,
 	"short" VARCHAR(128) NOT NULL,
-	"original" VARCHAR(128) NOT NULL,
+	"original" VARCHAR(128) NOT NULL UNIQUE,
 	"user_id" VARCHAR(12) NULL DEFAULT NULL,
 	PRIMARY KEY ("id")
 );`)
 
-	if connErr != nil {
-		fmt.Println(connErr.Error())
-		os.Exit(1)
+	if seedError != nil {
+		log.Fatal(seedError)
 	}
 
 	return repository
 }
 
-func (r PostgresRepository) Save(url URL) (URL, error) {
-	var dbID int
+func (r PostgresRepository) Insert(url URL) (URL, error) {
+	var dbURL = URL{}
 
-	err := r.database.QueryRow(`SELECT id FROM url WHERE id = $1;`, url.ID).Scan(&dbID)
+	err := r.database.QueryRow(`SELECT id, original, short, user_id FROM url WHERE id = $1 OR original= $2;`, url.ID, url.Original).Scan(&dbURL.ID, &dbURL.Original, &dbURL.Short, &dbURL.UserID)
 	if err != nil {
-		fmt.Println(err)
 		_, e := r.database.Exec(`INSERT INTO url (id, short, original, user_id) VALUES ($1, $2, $3, $4);`, url.ID, url.Short, url.Original, url.UserID)
 		if e != nil {
-			fmt.Println(e)
 			return url, e
 		}
-
 		return url, nil
 	}
 
-	_, e := r.database.Exec(`UPDATE url SET short=$1, original=$2, user_id=$3 WHERE id=$4;`, url.Short, url.Original, url.UserID, url.ID)
-	if e != nil {
-		return url, e
-	}
-
-	return url, nil
+	return dbURL, ErrorURLExists
 }
 
 func (r PostgresRepository) Get(id string) (URL, bool) {

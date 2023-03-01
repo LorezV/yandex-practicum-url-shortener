@@ -74,7 +74,7 @@ func TestURLHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repository.GlobalRepository = repository.MakeMemoryRepository()
 			for _, url := range tt.urls {
-				repository.GlobalRepository.Save(url)
+				repository.GlobalRepository.Insert(url)
 			}
 
 			r := chi.NewRouter()

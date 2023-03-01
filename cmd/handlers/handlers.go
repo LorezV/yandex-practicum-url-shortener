@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/repository"
 	"github.com/LorezV/url-shorter.git/cmd/utils"
@@ -32,9 +33,9 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	savedURL, saveError := repository.GlobalRepository.Save(url)
-	if saveError != nil {
-		http.Error(w, saveError.Error(), http.StatusInternalServerError)
+	savedURL, insertError := repository.GlobalRepository.Insert(url)
+	if insertError != nil && !errors.Is(insertError, repository.ErrorURLExists) {
+		http.Error(w, insertError.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -80,9 +81,9 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	savedURL, saveError := repository.GlobalRepository.Save(url)
-	if saveError != nil {
-		http.Error(w, saveError.Error(), http.StatusInternalServerError)
+	savedURL, insertError := repository.GlobalRepository.Insert(url)
+	if insertError != nil && !errors.Is(insertError, repository.ErrorURLExists) {
+		http.Error(w, insertError.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -213,8 +214,8 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		url, error = repository.GlobalRepository.Save(url)
-		if error != nil {
+		url, error = repository.GlobalRepository.Insert(url)
+		if error != nil && !errors.Is(error, repository.ErrorURLExists) {
 			http.Error(w, error.Error(), http.StatusInternalServerError)
 			return
 		}
