@@ -15,10 +15,10 @@ type Repository interface {
 }
 
 type URL struct {
-	ID       string `json:"-"`
+	ID       string `json:"id"`
 	Original string `json:"original_url"`
 	Short    string `json:"short_url"`
-	UserID   string `json:"-"`
+	UserID   string `json:"user_id"`
 }
 
 func MakeURL(original string, userID string) (URL, error) {

@@ -51,10 +51,6 @@ CREATE TABLE "url" (
 	return repository
 }
 
-//Save(url URL) (URL, error)
-//Get(id string) (URL, bool)
-//GetAllByUser(userID string) []URL
-
 func (r PostgresRepository) Save(url URL) (URL, error) {
 	var dbID int
 

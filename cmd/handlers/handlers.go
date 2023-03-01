@@ -128,7 +128,17 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(b) > 0 {
-		j, err := json.Marshal(b)
+		type ResponseElement struct {
+			OriginalURL string `json:"original_url"`
+			ShortURL    string `json:"short_url"`
+		}
+		v := make([]ResponseElement, len(b))
+
+		for index, url := range b {
+			v[index] = ResponseElement{OriginalURL: url.Original, ShortURL: url.Short}
+		}
+
+		j, err := json.Marshal(v)
 		if err != nil {
 			http.Error(w, "Can't marshal urls.", http.StatusInternalServerError)
 			return

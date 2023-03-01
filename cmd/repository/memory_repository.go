@@ -3,6 +3,7 @@ package repository
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"log"
 	"os"
@@ -29,7 +30,6 @@ func MakeMemoryRepository() Repository {
 		err = repository.LoadFromFile()
 
 		if err != nil {
-			log.Fatalf("Error loading repository from file %s", config.AppConfig.FileStoragePath)
 			log.Fatalf(err.Error())
 			return nil
 		}
@@ -61,10 +61,12 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 		err = json.Unmarshal([]byte(scanner.Text()), &url)
 
 		if err != nil {
-			return
+			return err
 		}
 
-		r.Save(url)
+		if ok := r.Add(url); !ok {
+			return fmt.Errorf("Can't pass url in memory.")
+		}
 	}
 
 	err = scanner.Err()
@@ -72,10 +74,8 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 }
 
 func (r MemoryRepository) Save(url URL) (URL, error) {
-	_, ok := r.storage[url.ID]
-	if !ok {
-		r.storage[url.ID] = url
-	}
+	r.Add(url)
+	fmt.Println(url)
 
 	if len(r.filePath) > 0 {
 		file, err := os.OpenFile(r.filePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
@@ -91,10 +91,19 @@ func (r MemoryRepository) Save(url URL) (URL, error) {
 			return url, errMarshal
 		}
 
-		file.Write(data)
+		file.Write([]byte(string(data) + "\n"))
 	}
 
 	return url, nil
+}
+
+func (r MemoryRepository) Add(url URL) bool {
+	_, ok := r.storage[url.ID]
+	if !ok {
+		r.storage[url.ID] = url
+	}
+
+	return !ok
 }
 
 func (r MemoryRepository) Get(id string) (URL, bool) {
