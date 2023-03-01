@@ -65,7 +65,7 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 		}
 
 		if ok := r.Add(url); !ok {
-			return fmt.Errorf("Can't pass url in memory.")
+			return fmt.Errorf("can't pass url in memory")
 		}
 	}
 
