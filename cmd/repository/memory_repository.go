@@ -27,6 +27,7 @@ func MakeMemoryRepository() Repository {
 
 		if err != nil {
 			log.Fatalf("Error loading repository from file %s", config.AppConfig.FileStoragePath)
+			log.Fatalf(err.Error())
 			return nil
 		}
 	}
