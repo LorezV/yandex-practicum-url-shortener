@@ -44,7 +44,8 @@ CREATE TABLE "url" (
 );`)
 
 	if connErr != nil {
-		fmt.Errorf(connErr.Error())
+		fmt.Println(connErr.Error())
+		os.Exit(1)
 	}
 
 	return repository
