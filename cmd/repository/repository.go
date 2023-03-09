@@ -11,10 +11,10 @@ import (
 var GlobalRepository Repository
 
 type Repository interface {
-	Insert(context context.Context, url URL) (URL, error)
-	InsertMany(context context.Context, urls []URL) ([]URL, error)
-	Get(context context.Context, id string) (URL, bool)
-	GetAllByUser(context context.Context, userID string) ([]URL, error)
+	Insert(ctx context.Context, url URL) (URL, error)
+	InsertMany(ctx context.Context, urls []URL) ([]URL, error)
+	Get(ctx context.Context, id string) (URL, bool)
+	GetAllByUser(ctx context.Context, userID string) ([]URL, error)
 }
 
 type URL struct {

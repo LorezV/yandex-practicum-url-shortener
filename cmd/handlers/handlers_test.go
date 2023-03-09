@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"context"
 	"github.com/LorezV/url-shorter.git/cmd/middlewares"
 	"io"
 	"net/http"
@@ -74,7 +75,7 @@ func TestURLHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repository.GlobalRepository = repository.MakeMemoryRepository()
 			for _, url := range tt.urls {
-				repository.GlobalRepository.Insert(url)
+				repository.GlobalRepository.Insert(context.Background(), url)
 			}
 
 			r := chi.NewRouter()
