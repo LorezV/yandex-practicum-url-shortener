@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
@@ -10,9 +11,10 @@ import (
 var GlobalRepository Repository
 
 type Repository interface {
-	Insert(url URL) (URL, error)
-	Get(id string) (URL, bool)
-	GetAllByUser(userID string) ([]URL, error)
+	Insert(context context.Context, url URL) (URL, error)
+	InsertMany(context context.Context, urls []URL) ([]URL, error)
+	Get(context context.Context, id string) (URL, bool)
+	GetAllByUser(context context.Context, userID string) ([]URL, error)
 }
 
 type URL struct {
@@ -36,4 +38,4 @@ func MakeURL(original string, userID string) (URL, error) {
 	return url, nil
 }
 
-var ErrorURLExists = errors.New("url with this original address already shorted")
+var ErrorUrlDuplicate = errors.New("url already exists")

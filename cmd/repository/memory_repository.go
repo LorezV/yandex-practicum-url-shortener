@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/cmd/config"
@@ -64,7 +65,7 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 			return err
 		}
 
-		if ok := r.Add(url); !ok {
+		if ok := r.Add(context.Background(), url); !ok {
 			return fmt.Errorf("can't pass url in memory")
 		}
 	}
@@ -73,8 +74,8 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 	return
 }
 
-func (r MemoryRepository) Insert(url URL) (URL, error) {
-	r.Add(url)
+func (r MemoryRepository) Insert(context context.Context, url URL) (URL, error) {
+	r.Add(context, url)
 
 	if len(r.filePath) > 0 {
 		file, err := os.OpenFile(r.filePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
@@ -96,7 +97,39 @@ func (r MemoryRepository) Insert(url URL) (URL, error) {
 	return url, nil
 }
 
-func (r MemoryRepository) Add(url URL) bool {
+func (r MemoryRepository) InsertMany(context context.Context, urls []URL) ([]URL, error) {
+	var (
+		rawData = ""
+		err     error
+	)
+
+	for _, url := range urls {
+		r.Add(context, url)
+
+		data, err := json.Marshal(&url)
+		if err != nil {
+			return urls, err
+		}
+
+		rawData += string(data) + "\n"
+	}
+
+	if len(r.filePath) > 0 {
+		file, err := os.OpenFile(r.filePath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
+
+		if err != nil {
+			return urls, err
+		}
+
+		defer file.Close()
+
+		file.Write([]byte(rawData))
+	}
+
+	return urls, err
+}
+
+func (r MemoryRepository) Add(context context.Context, url URL) bool {
 	_, ok := r.storage[url.ID]
 	if !ok {
 		r.storage[url.ID] = url
@@ -105,12 +138,12 @@ func (r MemoryRepository) Add(url URL) bool {
 	return !ok
 }
 
-func (r MemoryRepository) Get(id string) (URL, bool) {
+func (r MemoryRepository) Get(context context.Context, id string) (URL, bool) {
 	val, ok := r.storage[id]
 	return val, ok
 }
 
-func (r MemoryRepository) GetAllByUser(userID string) ([]URL, error) {
+func (r MemoryRepository) GetAllByUser(context context.Context, userID string) ([]URL, error) {
 	result := make([]URL, len(r.storage))
 	i := 0
 

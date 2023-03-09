@@ -27,20 +27,20 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
-	url, e := repository.MakeURL(string(b), userID)
-	if e != nil {
-		http.Error(w, e.Error(), http.StatusInternalServerError)
+	url, err := repository.MakeURL(string(b), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	var status = http.StatusCreated
 
-	savedURL, insertError := repository.GlobalRepository.Insert(url)
-	if insertError != nil {
-		if errors.Is(insertError, repository.ErrorURLExists) {
+	savedURL, err := repository.GlobalRepository.Insert(r.Context(), url)
+	if err != nil {
+		if errors.Is(err, repository.ErrorUrlDuplicate) {
 			status = http.StatusConflict
 		} else {
-			http.Error(w, insertError.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -81,20 +81,20 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
-	url, e := repository.MakeURL(data.URL, userID)
-	if e != nil {
-		http.Error(w, e.Error(), http.StatusInternalServerError)
+	url, err := repository.MakeURL(data.URL, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	var status = http.StatusCreated
 
-	savedURL, insertError := repository.GlobalRepository.Insert(url)
-	if insertError != nil {
-		if errors.Is(insertError, repository.ErrorURLExists) {
+	savedURL, err := repository.GlobalRepository.Insert(r.Context(), url)
+	if err != nil {
+		if errors.Is(err, repository.ErrorUrlDuplicate) {
 			status = http.StatusConflict
 		} else {
-			http.Error(w, insertError.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -103,10 +103,10 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		Result string `json:"result"`
 	}
 
-	responseBody, marshalError := json.Marshal(ResponseData{Result: savedURL.Short})
+	responseBody, err := json.Marshal(ResponseData{Result: savedURL.Short})
 
-	if marshalError != nil {
-		http.Error(w, marshalError.Error(), http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -123,45 +123,48 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if url, ok := repository.GlobalRepository.Get(id); ok {
-		w.Header().Set("Location", url.Original)
-		w.WriteHeader(307)
-	} else {
+	url, ok := repository.GlobalRepository.Get(r.Context(), id)
+	if !ok {
 		http.Error(w, "URL with this id not found!", http.StatusNotFound)
+		return
 	}
+
+	w.Header().Set("Location", url.Original)
+	w.WriteHeader(307)
 }
 
 func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
-	b, e := repository.GlobalRepository.GetAllByUser(userID)
+	b, err := repository.GlobalRepository.GetAllByUser(r.Context(), userID)
 
-	if e != nil {
+	if err != nil {
 		http.Error(w, "Can't get urls from repository.", http.StatusInternalServerError)
 		return
 	}
 
-	if len(b) > 0 {
-		type ResponseElement struct {
-			ShortURL    string `json:"short_url"`
-			OriginalURL string `json:"original_url"`
-		}
-		v := make([]ResponseElement, len(b))
-
-		for index, url := range b {
-			v[index] = ResponseElement{OriginalURL: url.Original, ShortURL: url.Short}
-		}
-
-		j, err := json.Marshal(v)
-		if err != nil {
-			http.Error(w, "Can't marshal json.", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(j)
+	if len(b) == 0 {
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+
+	type ResponseElement struct {
+		ShortURL    string `json:"short_url"`
+		OriginalURL string `json:"original_url"`
+	}
+	v := make([]ResponseElement, len(b))
+
+	for index, url := range b {
+		v[index] = ResponseElement{OriginalURL: url.Original, ShortURL: url.Short}
+	}
+
+	j, err := json.Marshal(v)
+	if err != nil {
+		http.Error(w, "Can't marshal json.", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
 }
 
 func CheckPing(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +174,7 @@ func CheckPing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
 	if err := config.DB.PingContext(ctx); err != nil {
@@ -215,30 +218,35 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 
+	correlationIDs := make([]string, len(requestData))
+	urls := make([]repository.URL, len(requestData))
+
 	for index, element := range requestData {
-		var (
-			err error
-			url repository.URL
-		)
-		url, err = repository.MakeURL(element.OriginalURL, userID)
+		url, err := repository.MakeURL(element.OriginalURL, userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		url, err = repository.GlobalRepository.Insert(url)
-		if err != nil && !errors.Is(err, repository.ErrorURLExists) {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		responseData[index] = ResponseDataElement{CorrelationID: element.CorrelationID, ShortURL: url.Short}
+		urls[index] = url
+		correlationIDs[index] = element.CorrelationID
 	}
 
-	responseBody, marshalError := json.Marshal(responseData)
+	urls, err = repository.GlobalRepository.InsertMany(r.Context(), urls)
 
-	if marshalError != nil {
-		http.Error(w, marshalError.Error(), http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for index, url := range urls {
+		responseData[index] = ResponseDataElement{CorrelationID: correlationIDs[index], ShortURL: url.Short}
+	}
+
+	responseBody, err := json.Marshal(responseData)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

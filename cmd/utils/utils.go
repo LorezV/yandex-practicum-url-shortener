@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/hex"
+	"github.com/LorezV/url-shorter.git/cmd/config"
 	"io"
 	"math/rand"
 	"net/http"
@@ -35,4 +38,10 @@ type GzipWriter struct {
 
 func (w GzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
+}
+
+func EncodeUserID(id string) []byte {
+	h := hmac.New(sha256.New, []byte(config.AppConfig.SecretKey))
+	h.Write([]byte(id))
+	return h.Sum(nil)
 }

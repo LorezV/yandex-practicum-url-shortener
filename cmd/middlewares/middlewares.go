@@ -4,9 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto/hmac"
-	"crypto/sha256"
 	"encoding/hex"
-	"github.com/LorezV/url-shorter.git/cmd/config"
 	"io"
 	"net/http"
 	"strings"
@@ -51,17 +49,15 @@ func Authorization(next http.Handler) http.Handler {
 		isCookieValid = false
 		cookie, err := r.Cookie("userID")
 
-		if err == nil {
+		if err == nil && len(cookie.Value) >= 12 {
 			id := cookie.Value[:12]
 			sign, e := hex.DecodeString(cookie.Value[12:])
 			if e != nil {
 				http.Error(w, "Can't decode string.", http.StatusInternalServerError)
 				return
 			}
-			h := hmac.New(sha256.New, []byte(config.AppConfig.SecretKey))
-			h.Write([]byte(id))
-			dst := h.Sum(nil)
-			isCookieValid = hmac.Equal(dst, sign)
+
+			isCookieValid = hmac.Equal(utils.EncodeUserID(id), sign)
 			if isCookieValid {
 				userID = id
 			}
@@ -74,10 +70,7 @@ func Authorization(next http.Handler) http.Handler {
 				return
 			}
 
-			h := hmac.New(sha256.New, []byte(config.AppConfig.SecretKey))
-			h.Write([]byte(id))
-			dst := h.Sum(nil)
-			value := id + hex.EncodeToString(dst)
+			value := id + hex.EncodeToString(utils.EncodeUserID(id))
 			cookie = &http.Cookie{Name: "userID", Value: value, MaxAge: 36000}
 			http.SetCookie(w, cookie)
 			userID = id
