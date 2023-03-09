@@ -217,18 +217,18 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 
 	for index, element := range requestData {
 		var (
-			error error
-			url   repository.URL
+			err error
+			url repository.URL
 		)
-		url, error = repository.MakeURL(element.OriginalURL, userID)
-		if error != nil {
-			http.Error(w, error.Error(), http.StatusInternalServerError)
+		url, err = repository.MakeURL(element.OriginalURL, userID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		url, error = repository.GlobalRepository.Insert(url)
-		if error != nil && !errors.Is(error, repository.ErrorURLExists) {
-			http.Error(w, error.Error(), http.StatusInternalServerError)
+		url, err = repository.GlobalRepository.Insert(url)
+		if err != nil && !errors.Is(err, repository.ErrorURLExists) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
