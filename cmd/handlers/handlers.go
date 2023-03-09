@@ -37,7 +37,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 
 	savedURL, err := repository.GlobalRepository.Insert(r.Context(), url)
 	if err != nil {
-		if errors.Is(err, repository.ErrorUrlDuplicate) {
+		if errors.Is(err, repository.ErrorURLDuplicate) {
 			status = http.StatusConflict
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -91,7 +91,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 
 	savedURL, err := repository.GlobalRepository.Insert(r.Context(), url)
 	if err != nil {
-		if errors.Is(err, repository.ErrorUrlDuplicate) {
+		if errors.Is(err, repository.ErrorURLDuplicate) {
 			status = http.StatusConflict
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

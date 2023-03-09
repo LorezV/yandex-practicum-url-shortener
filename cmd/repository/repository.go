@@ -38,4 +38,4 @@ func MakeURL(original string, userID string) (URL, error) {
 	return url, nil
 }
 
-var ErrorUrlDuplicate = errors.New("url already exists")
+var ErrorURLDuplicate = errors.New("url already exists")

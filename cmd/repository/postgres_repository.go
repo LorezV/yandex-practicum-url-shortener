@@ -66,7 +66,7 @@ func (r PostgresRepository) Insert(context context.Context, url URL) (URL, error
 				return url, err
 			}
 
-			return dbURL, ErrorUrlDuplicate
+			return dbURL, ErrorURLDuplicate
 		}
 		return url, err
 	}
