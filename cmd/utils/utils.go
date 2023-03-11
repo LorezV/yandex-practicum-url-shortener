@@ -1,27 +1,34 @@
 package utils
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"github.com/LorezV/url-shorter.git/cmd/config"
 	"io"
 	"math/rand"
 	"net/http"
-
-	"github.com/LorezV/url-shorter.git/cmd/storage"
 )
 
-func GenerateID() string {
-	runes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	id := make([]rune, 6)
-	for i := range id {
-		id[i] = runes[rand.Intn(len(runes))]
+type ContextKey string
+
+func GenerateID() (string, error) {
+	b, err := GenerateRandom(6)
+	if err != nil {
+		return "", err
 	}
 
-	// Простая проверка на уникальность
-	_, ok := storage.Repository.Get(string(id))
-	if ok {
-		return GenerateID()
+	return hex.EncodeToString(b), nil
+}
+
+func GenerateRandom(size int) ([]byte, error) {
+	b := make([]byte, size)
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
 	}
 
-	return string(id)
+	return b, nil
 }
 
 type GzipWriter struct {
@@ -31,4 +38,10 @@ type GzipWriter struct {
 
 func (w GzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
+}
+
+func EncodeUserID(id string) []byte {
+	h := hmac.New(sha256.New, []byte(config.AppConfig.SecretKey))
+	h.Write([]byte(id))
+	return h.Sum(nil)
 }

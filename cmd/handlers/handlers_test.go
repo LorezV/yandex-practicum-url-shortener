@@ -1,6 +1,8 @@
 package handlers_test
 
 import (
+	"context"
+	"github.com/LorezV/url-shorter.git/cmd/middlewares"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/storage"
+	"github.com/LorezV/url-shorter.git/cmd/repository"
 )
 
 func TestURLHandler(t *testing.T) {
@@ -22,17 +24,18 @@ func TestURLHandler(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		urls []storage.URL
+		urls []repository.URL
 		path string
 		want want
 	}{
 		{
 			name: "Test GET request with exiting url in repository.",
-			urls: []storage.URL{
+			urls: []repository.URL{
 				{
 					ID:       "xhxKQF",
 					Original: "https://practicum.yandex.ru",
 					Short:    "http://127.0.0.1:8080/xhxKQF",
+					UserID:   "",
 				},
 			},
 			path: "/xhxKQF",
@@ -43,7 +46,7 @@ func TestURLHandler(t *testing.T) {
 		},
 		{
 			name: "Test GET request with empty repository.",
-			urls: []storage.URL{},
+			urls: []repository.URL{},
 			path: "/xhxKQF",
 			want: want{
 				statusCode: http.StatusNotFound,
@@ -52,11 +55,12 @@ func TestURLHandler(t *testing.T) {
 		},
 		{
 			name: "Test GET request with different urls in the request and repository.",
-			urls: []storage.URL{
+			urls: []repository.URL{
 				{
 					ID:       "ASKTTG",
 					Original: "https://practicum.yandex.ru",
 					Short:    "http://127.0.0.1:8080/ASKTTG",
+					UserID:   "",
 				},
 			},
 			path: "/xhxKQF",
@@ -69,12 +73,13 @@ func TestURLHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			storage.Repository = storage.MakeRepository()
+			repository.GlobalRepository = repository.MakeMemoryRepository()
 			for _, url := range tt.urls {
-				storage.Repository.Add(url)
+				repository.GlobalRepository.Insert(context.Background(), url)
 			}
 
 			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
 			r.Get("/{id}", handlers.GetURL)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
@@ -118,6 +123,7 @@ func TestCreateURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
 			r.Post("/", handlers.CreateURL)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
@@ -176,6 +182,7 @@ func TestCreateURLJson(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
 			r.Post("/api/shorten", handlers.CreateURLJson)
 			ts := httptest.NewServer(r)
 			defer ts.Close()

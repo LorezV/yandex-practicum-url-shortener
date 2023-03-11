@@ -13,7 +13,7 @@ import (
 
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/storage"
+	"github.com/LorezV/url-shorter.git/cmd/repository"
 )
 
 func init() {
@@ -26,22 +26,31 @@ func init() {
 	flag.StringVar(&config.AppConfig.ServerAddress, "a", config.AppConfig.ServerAddress, "ip:port")
 	flag.StringVar(&config.AppConfig.BaseURL, "b", config.AppConfig.BaseURL, "protocol://ip:port")
 	flag.StringVar(&config.AppConfig.FileStoragePath, "f", config.AppConfig.FileStoragePath, "Path to file")
+	flag.StringVar(&config.AppConfig.DatabaseDsn, "d", config.AppConfig.DatabaseDsn, "Database connection URL")
 }
 
 func main() {
 	flag.Parse()
-	storage.Repository = storage.MakeRepository()
+	if len(config.AppConfig.DatabaseDsn) > 0 {
+		repository.GlobalRepository = repository.MakePostgresRepository()
+	} else {
+		repository.GlobalRepository = repository.MakeMemoryRepository()
+	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middlewares.GzipHandle)
+	r.Use(middlewares.Authorization)
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/{id}", handlers.GetURL)
 		r.Post("/", handlers.CreateURL)
 	})
+	r.Post("/api/shorten/batch", handlers.BatchURLJson)
 	r.Post("/api/shorten", handlers.CreateURLJson)
+	r.Get("/api/user/urls", handlers.GetUserUrls)
+	r.Get("/ping", handlers.CheckPing)
 
 	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
 }
