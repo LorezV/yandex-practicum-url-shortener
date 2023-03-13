@@ -49,7 +49,10 @@ func main() {
 	})
 	r.Post("/api/shorten/batch", handlers.BatchURLJson)
 	r.Post("/api/shorten", handlers.CreateURLJson)
-	r.Get("/api/user/urls", handlers.GetUserUrls)
+	r.Route("/api/user/urls", func(r chi.Router) {
+		r.Get("/", handlers.GetUserUrls)
+		r.Delete("/", handlers.DeleteUserUrls)
+	})
 	r.Get("/ping", handlers.CheckPing)
 
 	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))

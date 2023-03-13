@@ -39,6 +39,17 @@ func MakeMemoryRepository() Repository {
 	return repository
 }
 
+func (r MemoryRepository) DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool {
+	for _, id := range urlIDs {
+		if url, ok := r.Get(ctx, id); ok && url.UserID == userID {
+			url.IsDeleted = true
+			r.storage[url.ID] = url
+		}
+	}
+
+	return true
+}
+
 func (r MemoryRepository) LoadFromFile() (err error) {
 	var file *os.File
 
