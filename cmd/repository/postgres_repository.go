@@ -160,9 +160,5 @@ func (r PostgresRepository) DeleteManyByUser(ctx context.Context, urlIDs []strin
 	param := "{" + strings.Join(urlIDs, ",") + "}"
 	_, err := r.database.ExecContext(ctx, `UPDATE url SET is_deleted=true WHERE user_id=$1 AND id=ANY($2::VARCHAR[])`, userID, param)
 
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
