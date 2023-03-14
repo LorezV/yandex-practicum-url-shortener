@@ -52,8 +52,6 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
-	defer r.Body.Close()
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -129,6 +127,11 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if url.IsDeleted {
+		w.WriteHeader(http.StatusGone)
+		return
+	}
+
 	w.Header().Set("Location", url.Original)
 	w.WriteHeader(307)
 }
@@ -184,8 +187,6 @@ func CheckPing(w http.ResponseWriter, r *http.Request) {
 
 func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
-
-	defer r.Body.Close()
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -253,4 +254,30 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseBody)
+}
+
+func DeleteUserUrls(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(utils.ContextKey("userID")).(string)
+	b, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(string(b)) == 0 {
+		http.Error(w, "Can't handle empty body.", http.StatusInternalServerError)
+	}
+
+	var urlIDs []string
+	err = json.Unmarshal(b, &urlIDs)
+
+	if err != nil {
+		http.Error(w, "Can't unmarshal body data.", http.StatusInternalServerError)
+		return
+	}
+
+	go repository.GlobalRepository.DeleteManyByUser(context.Background(), urlIDs, userID)
+
+	w.WriteHeader(http.StatusAccepted)
 }

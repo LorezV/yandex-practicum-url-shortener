@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS "url" (
 	"short" VARCHAR(128) NOT NULL,
 	"original" VARCHAR(128) NOT NULL UNIQUE,
 	"user_id" VARCHAR(12) NULL DEFAULT NULL,
+	"is_deleted" BOOLEAN NOT NULL DEFAULT FALSE,
 	PRIMARY KEY ("id")
 );`)
 
@@ -55,13 +56,13 @@ CREATE TABLE IF NOT EXISTS "url" (
 	return repository
 }
 
-func (r PostgresRepository) Insert(context context.Context, url URL) (URL, error) {
-	_, err := r.database.ExecContext(context, `INSERT INTO url (id, short, original, user_id) VALUES ($1, $2, $3, $4);`, url.ID, url.Short, url.Original, url.UserID)
+func (r PostgresRepository) Insert(ctx context.Context, url URL) (URL, error) {
+	_, err := r.database.ExecContext(ctx, `INSERT INTO url (id, short, original, user_id) VALUES ($1, $2, $3, $4);`, url.ID, url.Short, url.Original, url.UserID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), pgerrcode.UniqueViolation) {
 			var dbURL URL
-			err := r.database.QueryRowContext(context, `SELECT id, short, original, user_id FROM url WHERE id=$1 OR original=$2;`, url.ID, url.Original).Scan(&dbURL.ID, &dbURL.Short, &dbURL.Original, &dbURL.UserID)
+			err := r.database.QueryRowContext(ctx, `SELECT id, short, original, user_id, is_deleted FROM url WHERE id=$1 OR original=$2;`, url.ID, url.Original).Scan(&dbURL.ID, &dbURL.Short, &dbURL.Original, &dbURL.UserID, &dbURL.IsDeleted)
 			if err != nil {
 				return url, err
 			}
@@ -74,7 +75,7 @@ func (r PostgresRepository) Insert(context context.Context, url URL) (URL, error
 	return url, nil
 }
 
-func (r PostgresRepository) InsertMany(context context.Context, urls []URL) ([]URL, error) {
+func (r PostgresRepository) InsertMany(ctx context.Context, urls []URL) ([]URL, error) {
 	tx, err := r.database.Begin()
 	if err != nil {
 		return urls, err
@@ -82,7 +83,7 @@ func (r PostgresRepository) InsertMany(context context.Context, urls []URL) ([]U
 
 	defer tx.Rollback()
 
-	stmt, err := tx.PrepareContext(context, `
+	stmt, err := tx.PrepareContext(ctx, `
 		INSERT INTO url (id, short, original, user_id) VALUES ($1, $2, $3, $4)
 		ON CONFLICT(original) DO UPDATE SET original=$3 
 		RETURNING id, short, original, user_id;
@@ -96,7 +97,7 @@ func (r PostgresRepository) InsertMany(context context.Context, urls []URL) ([]U
 	for index, url := range urls {
 		var dbURL URL
 
-		err := stmt.QueryRowContext(context, url.ID, url.Short, url.Original, url.UserID).Scan(&dbURL.ID, &dbURL.Short, &dbURL.Original, &dbURL.UserID)
+		err := stmt.QueryRowContext(ctx, url.ID, url.Short, url.Original, url.UserID).Scan(&dbURL.ID, &dbURL.Short, &dbURL.Original, &dbURL.UserID)
 		if err != nil {
 			return urls, err
 		}
@@ -107,10 +108,10 @@ func (r PostgresRepository) InsertMany(context context.Context, urls []URL) ([]U
 	return urls, tx.Commit()
 }
 
-func (r PostgresRepository) Get(context context.Context, id string) (URL, bool) {
+func (r PostgresRepository) Get(ctx context.Context, id string) (URL, bool) {
 	var url URL
 
-	err := r.database.QueryRowContext(context, `SELECT id, short, original, user_id FROM url WHERE id=$1`, id).Scan(&url.ID, &url.Short, &url.Original, &url.UserID)
+	err := r.database.QueryRowContext(ctx, `SELECT id, short, original, user_id, is_deleted FROM url WHERE id=$1`, id).Scan(&url.ID, &url.Short, &url.Original, &url.UserID, &url.IsDeleted)
 	if err != nil {
 		fmt.Println(err)
 		return url, false
@@ -119,14 +120,14 @@ func (r PostgresRepository) Get(context context.Context, id string) (URL, bool) 
 	return url, true
 }
 
-func (r PostgresRepository) GetAllByUser(context context.Context, userID string) ([]URL, error) {
+func (r PostgresRepository) GetAllByUser(ctx context.Context, userID string) ([]URL, error) {
 	var count int
-	e := r.database.QueryRowContext(context, `SELECT COUNT(*) FROM url WHERE user_id=$1`, userID).Scan(&count)
+	e := r.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM url WHERE user_id=$1 AND is_deleted=false`, userID).Scan(&count)
 	if e != nil {
 		return nil, e
 	}
 
-	rows, err := r.database.QueryContext(context, `SELECT id, short, original, user_id FROM url WHERE user_id=$1`, userID)
+	rows, err := r.database.QueryContext(ctx, `SELECT id, short, original, user_id, is_deleted FROM url WHERE user_id=$1 AND is_deleted=false`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +144,7 @@ func (r PostgresRepository) GetAllByUser(context context.Context, userID string)
 
 	for rows.Next() {
 		var url URL
-		err := rows.Scan(&url.ID, &url.Short, &url.Original, &url.UserID)
+		err := rows.Scan(&url.ID, &url.Short, &url.Original, &url.UserID, &url.IsDeleted)
 		if err != nil {
 			return nil, err
 		}
@@ -153,4 +154,11 @@ func (r PostgresRepository) GetAllByUser(context context.Context, userID string)
 	}
 
 	return urls[:i], nil
+}
+
+func (r PostgresRepository) DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool {
+	param := "{" + strings.Join(urlIDs, ",") + "}"
+	_, err := r.database.ExecContext(ctx, `UPDATE url SET is_deleted=true WHERE user_id=$1 AND id=ANY($2::VARCHAR[])`, userID, param)
+
+	return err == nil
 }

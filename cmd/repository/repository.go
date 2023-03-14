@@ -15,13 +15,15 @@ type Repository interface {
 	InsertMany(ctx context.Context, urls []URL) ([]URL, error)
 	Get(ctx context.Context, id string) (URL, bool)
 	GetAllByUser(ctx context.Context, userID string) ([]URL, error)
+	DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool
 }
 
 type URL struct {
-	ID       string `json:"id"`
-	Original string `json:"original_url"`
-	Short    string `json:"short_url"`
-	UserID   string `json:"user_id"`
+	ID        string `json:"id"`
+	Original  string `json:"original_url"`
+	Short     string `json:"short_url"`
+	UserID    string `json:"user_id"`
+	IsDeleted bool   `json:"-"`
 }
 
 func MakeURL(original string, userID string) (URL, error) {
@@ -34,6 +36,7 @@ func MakeURL(original string, userID string) (URL, error) {
 
 	url.ID = id
 	url.Short = fmt.Sprintf("%s/%s", config.AppConfig.BaseURL, id)
+	url.IsDeleted = false
 
 	return url, nil
 }
