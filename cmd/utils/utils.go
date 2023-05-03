@@ -2,11 +2,11 @@ package utils
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/LorezV/url-shorter.git/cmd/config"
 	"io"
-	"math/rand"
 	"net/http"
 )
 
