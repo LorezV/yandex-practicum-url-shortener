@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/LorezV/url-shorter.git/cmd/config"
-	"github.com/LorezV/url-shorter.git/cmd/repository"
-	"github.com/LorezV/url-shorter.git/cmd/utils"
-	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/LorezV/url-shorter.git/cmd/config"
+	"github.com/LorezV/url-shorter.git/cmd/repository"
+	"github.com/LorezV/url-shorter.git/cmd/utils"
 )
 
 // CreateURL handler creates url in repository and return shorten link.
@@ -99,11 +101,11 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	type ResponseData struct {
+	type responseData struct {
 		Result string `json:"result"`
 	}
 
-	responseBody, err := json.Marshal(ResponseData{Result: savedURL.Short})
+	responseBody, err := json.Marshal(responseData{Result: savedURL.Short})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -154,14 +156,14 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type ResponseElement struct {
+	type responseElement struct {
 		ShortURL    string `json:"short_url"`
 		OriginalURL string `json:"original_url"`
 	}
-	v := make([]ResponseElement, len(b))
+	v := make([]responseElement, len(b))
 
 	for index, url := range b {
-		v[index] = ResponseElement{OriginalURL: url.Original, ShortURL: url.Short}
+		v[index] = responseElement{OriginalURL: url.Original, ShortURL: url.Short}
 	}
 
 	j, err := json.Marshal(v)
@@ -216,12 +218,12 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type ResponseDataElement struct {
+	type responseDataElement struct {
 		CorrelationID string `json:"correlation_id"`
 		ShortURL      string `json:"short_url"`
 	}
 
-	var responseData = make([]ResponseDataElement, len(requestData))
+	var responseData = make([]responseDataElement, len(requestData))
 
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 
@@ -247,7 +249,7 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for index, url := range urls {
-		responseData[index] = ResponseDataElement{CorrelationID: correlationIDs[index], ShortURL: url.Short}
+		responseData[index] = responseDataElement{CorrelationID: correlationIDs[index], ShortURL: url.Short}
 	}
 
 	responseBody, err := json.Marshal(responseData)

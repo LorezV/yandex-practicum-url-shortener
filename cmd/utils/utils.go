@@ -33,11 +33,13 @@ func GenerateRandom(size int) ([]byte, error) {
 	return b, nil
 }
 
+// GzipWriter is ResponseWriter with another writer, to write compressed data to response body.
 type GzipWriter struct {
 	http.ResponseWriter
 	Writer io.Writer
 }
 
+// Implementation for GzipWriter.Write
 func (w GzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
