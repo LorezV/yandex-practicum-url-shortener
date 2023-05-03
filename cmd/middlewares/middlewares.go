@@ -12,6 +12,7 @@ import (
 	"github.com/LorezV/url-shorter.git/cmd/utils"
 )
 
+// GzipHandle middleware do compress and decompress data from request body if Content-Encoding header equals gzip.
 func GzipHandle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {
@@ -39,6 +40,7 @@ func GzipHandle(next http.Handler) http.Handler {
 	})
 }
 
+// Authorization middleware checks auth token in request cookie and if it not valid creates new user and new token else adds to context user from database.
 func Authorization(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (

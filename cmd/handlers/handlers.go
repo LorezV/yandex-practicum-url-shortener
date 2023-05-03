@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// CreateURL handler creates url in repository and return shorten link.
 func CreateURL(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
@@ -49,6 +50,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(savedURL.Short))
 }
 
+// CreateURLJson handler creates url in repository and return shorten link in json format.
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
@@ -113,6 +115,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
+// GetURL handler takes id argument from get request parameters and return url from database.
 func GetURL(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
@@ -136,6 +139,7 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(307)
 }
 
+// GetUserUrls handler takes userID from context and return all user's urls.
 func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	b, err := repository.GlobalRepository.GetAllByUser(r.Context(), userID)
@@ -170,6 +174,7 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+// CheckPing handler send database request to check ping.
 func CheckPing(w http.ResponseWriter, r *http.Request) {
 
 	if len(config.AppConfig.DatabaseDsn) == 0 {
@@ -185,6 +190,7 @@ func CheckPing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// BatchURLJson handler creates many urls in database in one request.
 func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
@@ -256,6 +262,7 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
+// DeleteUserUrls handler delete many urls in database by ids in request body.
 func DeleteUserUrls(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	b, err := io.ReadAll(r.Body)

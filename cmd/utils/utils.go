@@ -12,6 +12,7 @@ import (
 
 type ContextKey string
 
+// GenerateID returns random string with len = 6
 func GenerateID() (string, error) {
 	b, err := GenerateRandom(6)
 	if err != nil {
@@ -21,6 +22,7 @@ func GenerateID() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
+// GenerateRandom returns random string.
 func GenerateRandom(size int) ([]byte, error) {
 	b := make([]byte, size)
 	_, err := rand.Read(b)
@@ -40,6 +42,7 @@ func (w GzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
+// EncodeUserID encode string with user id by secret key from config.
 func EncodeUserID(id string) []byte {
 	h := hmac.New(sha256.New, []byte(config.AppConfig.SecretKey))
 	h.Write([]byte(id))
