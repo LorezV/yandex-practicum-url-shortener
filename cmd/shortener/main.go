@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -42,6 +43,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Authorization)
+
+	r.Mount("/debug", middleware.Profiler())
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/{id}", handlers.GetURL)
