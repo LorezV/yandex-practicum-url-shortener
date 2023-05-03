@@ -229,43 +229,6 @@ func TestGetUserUrls(t *testing.T) {
 	}
 }
 
-//func TestDeleteUserUrls(t *testing.T) {
-//	type want struct {
-//		statusCode int
-//	}
-//	tests := []struct {
-//		name   string
-//		path   string
-//		method string
-//		body   string
-//		want   want
-//	}{
-//		{
-//			name:   "Test deleting user urls",
-//			path:   "/api/user/urls",
-//			method: http.MethodDelete,
-//			body:   `["98978", "78977", "7777"]`,
-//			want: want{
-//				statusCode: http.StatusAccepted,
-//			},
-//		},
-//	}
-//
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			r := chi.NewRouter()
-//			r.Use(middlewares.Authorization)
-//			r.Delete("/api/user/urls", handlers.DeleteUserUrls)
-//			ts := httptest.NewServer(r)
-//			defer ts.Close()
-//
-//			resp, _ := testRequest(t, ts, tt.method, tt.path, strings.NewReader(tt.body))
-//
-//			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
-//		})
-//	}
-//}
-
 func TestBatchURLJson(t *testing.T) {
 	type want struct {
 		statusCode int
