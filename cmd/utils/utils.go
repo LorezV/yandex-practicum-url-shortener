@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// ContextKey is a string alias for gettings values from context.
 type ContextKey string
 
 // GenerateID returns random string with len = 6
@@ -39,7 +40,7 @@ type GzipWriter struct {
 	Writer io.Writer
 }
 
-// Implementation for GzipWriter.Write
+// Write writes compressed data in gzip
 func (w GzipWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
