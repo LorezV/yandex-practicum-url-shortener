@@ -4,15 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/LorezV/url-shorter.git/cmd/config"
-	"github.com/LorezV/url-shorter.git/cmd/repository"
-	"github.com/LorezV/url-shorter.git/cmd/utils"
-	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/LorezV/url-shorter.git/cmd/config"
+	"github.com/LorezV/url-shorter.git/cmd/repository"
+	"github.com/LorezV/url-shorter.git/cmd/utils"
 )
 
+// CreateURL handler creates url in repository and return shorten link.
 func CreateURL(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
@@ -49,6 +52,7 @@ func CreateURL(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(savedURL.Short))
 }
 
+// CreateURLJson handler creates url in repository and return shorten link in json format.
 func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
@@ -97,11 +101,11 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	type ResponseData struct {
+	type responseData struct {
 		Result string `json:"result"`
 	}
 
-	responseBody, err := json.Marshal(ResponseData{Result: savedURL.Short})
+	responseBody, err := json.Marshal(responseData{Result: savedURL.Short})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -113,6 +117,7 @@ func CreateURLJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
+// GetURL handler takes id argument from get request parameters and return url from database.
 func GetURL(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
@@ -136,6 +141,7 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(307)
 }
 
+// GetUserUrls handler takes userID from context and return all user's urls.
 func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	b, err := repository.GlobalRepository.GetAllByUser(r.Context(), userID)
@@ -150,14 +156,14 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type ResponseElement struct {
+	type responseElement struct {
 		ShortURL    string `json:"short_url"`
 		OriginalURL string `json:"original_url"`
 	}
-	v := make([]ResponseElement, len(b))
+	v := make([]responseElement, len(b))
 
 	for index, url := range b {
-		v[index] = ResponseElement{OriginalURL: url.Original, ShortURL: url.Short}
+		v[index] = responseElement{OriginalURL: url.Original, ShortURL: url.Short}
 	}
 
 	j, err := json.Marshal(v)
@@ -170,6 +176,7 @@ func GetUserUrls(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+// CheckPing handler send database request to check ping.
 func CheckPing(w http.ResponseWriter, r *http.Request) {
 
 	if len(config.AppConfig.DatabaseDsn) == 0 {
@@ -185,6 +192,7 @@ func CheckPing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// BatchURLJson handler creates many urls in database in one request.
 func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 
@@ -210,12 +218,12 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type ResponseDataElement struct {
+	type responseDataElement struct {
 		CorrelationID string `json:"correlation_id"`
 		ShortURL      string `json:"short_url"`
 	}
 
-	var responseData = make([]ResponseDataElement, len(requestData))
+	var responseData = make([]responseDataElement, len(requestData))
 
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 
@@ -241,7 +249,7 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for index, url := range urls {
-		responseData[index] = ResponseDataElement{CorrelationID: correlationIDs[index], ShortURL: url.Short}
+		responseData[index] = responseDataElement{CorrelationID: correlationIDs[index], ShortURL: url.Short}
 	}
 
 	responseBody, err := json.Marshal(responseData)
@@ -256,6 +264,7 @@ func BatchURLJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
+// DeleteUserUrls handler delete many urls in database by ids in request body.
 func DeleteUserUrls(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(utils.ContextKey("userID")).(string)
 	b, err := io.ReadAll(r.Body)

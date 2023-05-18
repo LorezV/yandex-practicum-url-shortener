@@ -11,11 +11,13 @@ import (
 	"path/filepath"
 )
 
+// MemoryRepository is Repository implementation for working with urls in memory and file.
 type MemoryRepository struct {
 	storage  map[string]URL
 	filePath string
 }
 
+// MakeMemoryRepository is constructor for MemoryRepository.
 func MakeMemoryRepository() Repository {
 	var repository = MemoryRepository{storage: make(map[string]URL)}
 
@@ -39,6 +41,7 @@ func MakeMemoryRepository() Repository {
 	return repository
 }
 
+// DeleteManyByUser is constructor for MemoryRepository.
 func (r MemoryRepository) DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool {
 	for _, id := range urlIDs {
 		if url, ok := r.Get(ctx, id); ok && url.UserID == userID {
@@ -50,6 +53,7 @@ func (r MemoryRepository) DeleteManyByUser(ctx context.Context, urlIDs []string,
 	return true
 }
 
+// LoadFromFile loads urls from file.
 func (r MemoryRepository) LoadFromFile() (err error) {
 	var file *os.File
 
@@ -85,6 +89,7 @@ func (r MemoryRepository) LoadFromFile() (err error) {
 	return
 }
 
+// Insert adds row in file storage.
 func (r MemoryRepository) Insert(context context.Context, url URL) (URL, error) {
 	r.Add(context, url)
 
@@ -108,6 +113,7 @@ func (r MemoryRepository) Insert(context context.Context, url URL) (URL, error) 
 	return url, nil
 }
 
+// InsertMany adds many rows in file storage.
 func (r MemoryRepository) InsertMany(context context.Context, urls []URL) ([]URL, error) {
 	var (
 		rawData = ""
@@ -140,6 +146,7 @@ func (r MemoryRepository) InsertMany(context context.Context, urls []URL) ([]URL
 	return urls, err
 }
 
+// Add adds url in memory.
 func (r MemoryRepository) Add(context context.Context, url URL) bool {
 	_, ok := r.storage[url.ID]
 	if !ok {
@@ -149,11 +156,13 @@ func (r MemoryRepository) Add(context context.Context, url URL) bool {
 	return !ok
 }
 
+// Get select row by id from file storage.
 func (r MemoryRepository) Get(context context.Context, id string) (URL, bool) {
 	val, ok := r.storage[id]
 	return val, ok
 }
 
+// GetAllByUser select many rows by user_id from file storage.
 func (r MemoryRepository) GetAllByUser(context context.Context, userID string) ([]URL, error) {
 	result := make([]URL, len(r.storage))
 	i := 0

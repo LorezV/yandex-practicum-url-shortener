@@ -12,10 +12,12 @@ import (
 	"time"
 )
 
+// PostgresRepository is Repository implementation for working with postgesql database.
 type PostgresRepository struct {
 	database *sql.DB
 }
 
+// MakePostgresRepository is constructor for PostgresRepository.
 func MakePostgresRepository() Repository {
 	var err error
 	config.DB, err = sql.Open("pgx", config.AppConfig.DatabaseDsn)
@@ -56,6 +58,7 @@ CREATE TABLE IF NOT EXISTS "url" (
 	return repository
 }
 
+// Insert adds row in url database table.
 func (r PostgresRepository) Insert(ctx context.Context, url URL) (URL, error) {
 	_, err := r.database.ExecContext(ctx, `INSERT INTO url (id, short, original, user_id) VALUES ($1, $2, $3, $4);`, url.ID, url.Short, url.Original, url.UserID)
 
@@ -75,6 +78,7 @@ func (r PostgresRepository) Insert(ctx context.Context, url URL) (URL, error) {
 	return url, nil
 }
 
+// InsertMany adds many rows in url database table.
 func (r PostgresRepository) InsertMany(ctx context.Context, urls []URL) ([]URL, error) {
 	tx, err := r.database.Begin()
 	if err != nil {
@@ -108,6 +112,7 @@ func (r PostgresRepository) InsertMany(ctx context.Context, urls []URL) ([]URL, 
 	return urls, tx.Commit()
 }
 
+// Get select row by id from url table.
 func (r PostgresRepository) Get(ctx context.Context, id string) (URL, bool) {
 	var url URL
 
@@ -120,6 +125,7 @@ func (r PostgresRepository) Get(ctx context.Context, id string) (URL, bool) {
 	return url, true
 }
 
+// GetAllByUser select many rows by user_id from url table.
 func (r PostgresRepository) GetAllByUser(ctx context.Context, userID string) ([]URL, error) {
 	var count int
 	e := r.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM url WHERE user_id=$1 AND is_deleted=false`, userID).Scan(&count)
@@ -156,6 +162,7 @@ func (r PostgresRepository) GetAllByUser(ctx context.Context, userID string) ([]
 	return urls[:i], nil
 }
 
+// DeleteManyByUser delete many rows by user_id in url table.
 func (r PostgresRepository) DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool {
 	param := "{" + strings.Join(urlIDs, ",") + "}"
 	_, err := r.database.ExecContext(ctx, `UPDATE url SET is_deleted=true WHERE user_id=$1 AND id=ANY($2::VARCHAR[])`, userID, param)
