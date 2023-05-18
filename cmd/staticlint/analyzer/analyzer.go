@@ -5,6 +5,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// OsExitAnalyzer don't analyzer that don't allow os.Exit in main package.
 var OsExitAnalyzer = &analysis.Analyzer{
 	Name: "os.Exit analyzer",
 	Doc:  "Don't allow os.Exit in main package",

@@ -17,7 +17,10 @@ import (
 	"github.com/LorezV/url-shorter.git/cmd/staticlint/analyzer"
 )
 
+// StaticChecks contains prefixes of static check analyzers.
 var StaticChecks = []string{"SA"}
+
+// StyleChecks contains style checks rules..
 var StyleChecks = []string{"ST1000", "ST1005"}
 
 func main() {
