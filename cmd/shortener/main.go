@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/LorezV/url-shorter.git/internal/config"
 	"github.com/LorezV/url-shorter.git/internal/handlers"
 	"github.com/LorezV/url-shorter.git/internal/middlewares"
@@ -14,6 +15,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+)
+
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
 )
 
 func init() {
@@ -30,6 +37,10 @@ func init() {
 }
 
 func main() {
+	fmt.Println("Build version:", buildVersion)
+	fmt.Println("Build version:", buildDate)
+	fmt.Println("Build version:", buildCommit)
+
 	flag.Parse()
 	if len(config.AppConfig.DatabaseDsn) > 0 {
 		repository2.GlobalRepository = repository2.MakePostgresRepository()
