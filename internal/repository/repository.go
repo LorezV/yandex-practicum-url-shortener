@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/LorezV/url-shorter.git/cmd/config"
-	"github.com/LorezV/url-shorter.git/cmd/utils"
+	"github.com/LorezV/url-shorter.git/internal/config"
+	"github.com/LorezV/url-shorter.git/internal/utils"
 )
 
 // GlobalRepository it's repository variable.

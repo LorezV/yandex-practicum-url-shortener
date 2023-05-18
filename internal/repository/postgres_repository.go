@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/LorezV/url-shorter.git/cmd/config"
+	"github.com/LorezV/url-shorter.git/internal/config"
 	"github.com/jackc/pgerrcode"
 	"log"
 	"os"

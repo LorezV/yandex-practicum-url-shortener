@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/LorezV/url-shorter.git/cmd/config"
+	"github.com/LorezV/url-shorter.git/internal/config"
 	"log"
 	"os"
 	"path/filepath"

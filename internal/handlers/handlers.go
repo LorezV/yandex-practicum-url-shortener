@@ -4,15 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/LorezV/url-shorter.git/internal/config"
+	"github.com/LorezV/url-shorter.git/internal/repository"
+	"github.com/LorezV/url-shorter.git/internal/utils"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
-
-	"github.com/LorezV/url-shorter.git/cmd/config"
-	"github.com/LorezV/url-shorter.git/cmd/repository"
-	"github.com/LorezV/url-shorter.git/cmd/utils"
 )
 
 // CreateURL handler creates url in repository and return shorten link.
