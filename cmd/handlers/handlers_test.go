@@ -17,7 +17,7 @@ import (
 	"github.com/LorezV/url-shorter.git/cmd/repository"
 )
 
-func TestURLHandler(t *testing.T) {
+func TestGetURL(t *testing.T) {
 	type want struct {
 		statusCode int
 		location   string
@@ -194,15 +194,141 @@ func TestCreateURLJson(t *testing.T) {
 	}
 }
 
-func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (http.Response, string) {
-	req, err := http.NewRequest(method, ts.URL+path, body)
-	require.NoError(t, err)
+func TestGetUserUrls(t *testing.T) {
+	type want struct {
+		statusCode int
+	}
+	tests := []struct {
+		name   string
+		path   string
+		method string
+		want   want
+	}{
+		{
+			name:   "Try to getting user urls",
+			path:   "/api/user/urls",
+			method: http.MethodGet,
+			want: want{
+				statusCode: http.StatusNoContent,
+			},
+		},
+	}
 
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
+			r.Get("/api/user/urls", handlers.GetUserUrls)
+			ts := httptest.NewServer(r)
+			defer ts.Close()
+
+			resp, _ := testRequest(t, ts, tt.method, tt.path, nil)
+
+			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
+		})
+	}
+}
+
+//func TestDeleteUserUrls(t *testing.T) {
+//	type want struct {
+//		statusCode int
+//	}
+//	tests := []struct {
+//		name   string
+//		path   string
+//		method string
+//		body   string
+//		want   want
+//	}{
+//		{
+//			name:   "Test deleting user urls",
+//			path:   "/api/user/urls",
+//			method: http.MethodDelete,
+//			body:   `["98978", "78977", "7777"]`,
+//			want: want{
+//				statusCode: http.StatusAccepted,
+//			},
+//		},
+//	}
+//
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			r := chi.NewRouter()
+//			r.Use(middlewares.Authorization)
+//			r.Delete("/api/user/urls", handlers.DeleteUserUrls)
+//			ts := httptest.NewServer(r)
+//			defer ts.Close()
+//
+//			resp, _ := testRequest(t, ts, tt.method, tt.path, strings.NewReader(tt.body))
+//
+//			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
+//		})
+//	}
+//}
+
+func TestBatchURLJson(t *testing.T) {
+	type want struct {
+		statusCode int
+		location   string
+	}
+	tests := []struct {
+		name string
+		path string
+		body string
+		want want
+	}{
+		{
+			name: "Test with valid data",
+			path: "/api/shorten/batch",
+			body: `[{"correlation_id":"12123", "original_url": "http://yandex.practicum.ru"}, {"correlation_id":"2321312", "original_url": "google.com"}]`,
+			want: want{
+				statusCode: http.StatusCreated,
+			},
+		},
+		{
+			name: "Test with invalid body",
+			path: "/api/shorten/batch",
+			body: ``,
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := chi.NewRouter()
+			r.Use(middlewares.Authorization)
+			r.Post("/api/shorten/batch", handlers.BatchURLJson)
+			ts := httptest.NewServer(r)
+			defer ts.Close()
+
+			resp, _ := testRequest(t, ts, http.MethodPost, tt.path, strings.NewReader(tt.body))
+
+			assert.Equal(t, tt.want.statusCode, resp.StatusCode)
+		})
+	}
+}
+
+func makeRequest(ts *httptest.Server, method, path string, body io.Reader) (*http.Request, error) {
+	return http.NewRequest(method, ts.URL+path, body)
+}
+
+func makeClient() *http.Client {
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 	}
+
+	return client
+}
+
+func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (http.Response, string) {
+	req, err := makeRequest(ts, method, path, body)
+	require.NoError(t, err)
+
+	client := makeClient()
 	resp, err := client.Do(req)
 	require.NoError(t, err)
 
