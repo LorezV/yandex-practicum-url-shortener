@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/internal/config"
 	"github.com/LorezV/url-shorter.git/internal/handlers"
@@ -24,17 +23,12 @@ var (
 )
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
 	err := config.LoadAppConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	flag.StringVar(&config.AppConfig.ServerAddress, "a", config.AppConfig.ServerAddress, "ip:port")
-	flag.StringVar(&config.AppConfig.BaseURL, "b", config.AppConfig.BaseURL, "protocol://ip:port")
-	flag.StringVar(&config.AppConfig.FileStoragePath, "f", config.AppConfig.FileStoragePath, "Path to file")
-	flag.StringVar(&config.AppConfig.DatabaseDsn, "d", config.AppConfig.DatabaseDsn, "Database connection URL")
-	flag.BoolVar(&config.AppConfig.EnableHTTP, "s", config.AppConfig.EnableHTTP, "Enable tls")
+	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
@@ -42,7 +36,6 @@ func main() {
 	fmt.Println("Build version:", buildDate)
 	fmt.Println("Build version:", buildCommit)
 
-	flag.Parse()
 	if len(config.AppConfig.DatabaseDsn) > 0 {
 		repository2.GlobalRepository = repository2.MakePostgresRepository()
 	} else {
@@ -69,7 +62,7 @@ func main() {
 	})
 	r.Get("/ping", handlers.CheckPing)
 
-	if config.AppConfig.EnableHTTP {
+	if config.AppConfig.EnableHTTPS {
 		log.Fatal(http.ListenAndServeTLS(config.AppConfig.ServerAddress, "cmd/shortener/server.ctr", "cmd/shortener/server.key", r))
 	} else {
 		log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
