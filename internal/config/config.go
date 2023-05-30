@@ -15,7 +15,7 @@ type config struct {
 	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 	SecretKey       string `env:"SECRET_KEY" envDefault:"ca5ee5227ead"`
 	DatabaseDsn     string `env:"DATABASE_DSN"`
-	EnableHttp      bool   `env:"ENABLE_HTTPS"`
+	EnableHTTP      bool   `env:"ENABLE_HTTPS"`
 	//DatabaseDsn string `env:"DATABASE_DSN" envDefault:"postgres://postgres:admin@localhost:5432/go-learn?sslmode=disable"`
 }
 
