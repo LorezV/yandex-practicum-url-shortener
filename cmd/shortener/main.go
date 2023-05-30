@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/internal/config"
 	"github.com/LorezV/url-shorter.git/internal/handlers"
@@ -10,6 +11,9 @@ import (
 	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -32,6 +36,10 @@ func init() {
 }
 
 func main() {
+	shutdown := make(chan struct{})
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
 	fmt.Println("Build version:", buildVersion)
 	fmt.Println("Build version:", buildDate)
 	fmt.Println("Build version:", buildCommit)
@@ -62,9 +70,20 @@ func main() {
 	})
 	r.Get("/ping", handlers.CheckPing)
 
+	srv := &http.Server{Addr: config.AppConfig.ServerAddress, Handler: r}
+
+	go func() {
+		<-sigint
+		srv.Shutdown(context.Background())
+
+		close(shutdown)
+	}()
+
 	if config.AppConfig.EnableHTTPS {
-		log.Fatal(http.ListenAndServeTLS(config.AppConfig.ServerAddress, "cmd/shortener/server.ctr", "cmd/shortener/server.key", r))
+		log.Fatal(srv.ListenAndServeTLS("cmd/shortener/server.ctr", "cmd/shortener/server.key"))
 	} else {
-		log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
+		log.Fatal(srv.ListenAndServe())
 	}
+
+	<-shutdown
 }

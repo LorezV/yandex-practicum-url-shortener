@@ -82,7 +82,7 @@ func LoadAppConfig() error {
 			AppConfig.DatabaseDsn = tempConfig.DatabaseDsn
 		}
 
-		if !AppConfig.EnableHTTPS {
+		if !AppConfig.EnableHTTPS || tempConfig.EnableHTTPS {
 			AppConfig.EnableHTTPS = tempConfig.EnableHTTPS
 		}
 	}
