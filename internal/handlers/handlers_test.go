@@ -2,7 +2,9 @@ package handlers_test
 
 import (
 	"context"
-	"github.com/LorezV/url-shorter.git/cmd/middlewares"
+	"github.com/LorezV/url-shorter.git/internal/handlers"
+	"github.com/LorezV/url-shorter.git/internal/middlewares"
+	repository2 "github.com/LorezV/url-shorter.git/internal/repository"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,9 +14,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/repository"
 )
 
 func TestGetURL(t *testing.T) {
@@ -24,13 +23,13 @@ func TestGetURL(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		urls []repository.URL
+		urls []repository2.URL
 		path string
 		want want
 	}{
 		{
 			name: "Test GET request with exiting url in repository.",
-			urls: []repository.URL{
+			urls: []repository2.URL{
 				{
 					ID:       "xhxKQF",
 					Original: "https://practicum.yandex.ru",
@@ -46,7 +45,7 @@ func TestGetURL(t *testing.T) {
 		},
 		{
 			name: "Test GET request with empty repository.",
-			urls: []repository.URL{},
+			urls: []repository2.URL{},
 			path: "/xhxKQF",
 			want: want{
 				statusCode: http.StatusNotFound,
@@ -55,7 +54,7 @@ func TestGetURL(t *testing.T) {
 		},
 		{
 			name: "Test GET request with different urls in the request and repository.",
-			urls: []repository.URL{
+			urls: []repository2.URL{
 				{
 					ID:       "ASKTTG",
 					Original: "https://practicum.yandex.ru",
@@ -73,9 +72,9 @@ func TestGetURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repository.GlobalRepository = repository.MakeMemoryRepository()
+			repository2.GlobalRepository = repository2.MakeMemoryRepository()
 			for _, url := range tt.urls {
-				repository.GlobalRepository.Insert(context.Background(), url)
+				repository2.GlobalRepository.Insert(context.Background(), url)
 			}
 
 			r := chi.NewRouter()

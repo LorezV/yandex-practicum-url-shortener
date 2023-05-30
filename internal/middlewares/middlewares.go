@@ -5,11 +5,10 @@ import (
 	"context"
 	"crypto/hmac"
 	"encoding/hex"
+	"github.com/LorezV/url-shorter.git/internal/utils"
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/LorezV/url-shorter.git/cmd/utils"
 )
 
 // GzipHandle middleware do compress and decompress data from request body if Content-Encoding header equals gzip.

@@ -2,7 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/LorezV/url-shorter.git/cmd/middlewares"
+	"fmt"
+	"github.com/LorezV/url-shorter.git/internal/config"
+	"github.com/LorezV/url-shorter.git/internal/handlers"
+	"github.com/LorezV/url-shorter.git/internal/middlewares"
+	repository2 "github.com/LorezV/url-shorter.git/internal/repository"
 	"log"
 	"math/rand"
 	"net/http"
@@ -11,10 +15,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+)
 
-	"github.com/LorezV/url-shorter.git/cmd/config"
-	"github.com/LorezV/url-shorter.git/cmd/handlers"
-	"github.com/LorezV/url-shorter.git/cmd/repository"
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
 )
 
 func init() {
@@ -31,11 +37,15 @@ func init() {
 }
 
 func main() {
+	fmt.Println("Build version:", buildVersion)
+	fmt.Println("Build version:", buildDate)
+	fmt.Println("Build version:", buildCommit)
+
 	flag.Parse()
 	if len(config.AppConfig.DatabaseDsn) > 0 {
-		repository.GlobalRepository = repository.MakePostgresRepository()
+		repository2.GlobalRepository = repository2.MakePostgresRepository()
 	} else {
-		repository.GlobalRepository = repository.MakeMemoryRepository()
+		repository2.GlobalRepository = repository2.MakeMemoryRepository()
 	}
 
 	r := chi.NewRouter()

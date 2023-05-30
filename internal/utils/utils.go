@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/LorezV/url-shorter.git/cmd/config"
+	"github.com/LorezV/url-shorter.git/internal/config"
 	"io"
 	"net/http"
 )
