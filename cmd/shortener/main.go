@@ -34,6 +34,7 @@ func init() {
 	flag.StringVar(&config.AppConfig.BaseURL, "b", config.AppConfig.BaseURL, "protocol://ip:port")
 	flag.StringVar(&config.AppConfig.FileStoragePath, "f", config.AppConfig.FileStoragePath, "Path to file")
 	flag.StringVar(&config.AppConfig.DatabaseDsn, "d", config.AppConfig.DatabaseDsn, "Database connection URL")
+	flag.BoolVar(&config.AppConfig.EnableHttp, "s", config.AppConfig.EnableHttp, "Enable tls")
 }
 
 func main() {
@@ -68,5 +69,9 @@ func main() {
 	})
 	r.Get("/ping", handlers.CheckPing)
 
-	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
+	if config.AppConfig.EnableHttp {
+		log.Fatal(http.ListenAndServeTLS(config.AppConfig.ServerAddress, "cmd/shortener/server.ctr", "cmd/shortener/server.key", r))
+	} else {
+		log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
+	}
 }
