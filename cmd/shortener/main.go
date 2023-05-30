@@ -75,7 +75,6 @@ func main() {
 	go func() {
 		<-sigint
 		srv.Shutdown(context.Background())
-
 		close(shutdown)
 	}()
 
