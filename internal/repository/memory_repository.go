@@ -176,3 +176,8 @@ func (r MemoryRepository) GetAllByUser(context context.Context, userID string) (
 
 	return result[:i], nil
 }
+
+func (r MemoryRepository) Close() error {
+	fmt.Println("Close memory repository")
+	return nil
+}

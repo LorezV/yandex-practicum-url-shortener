@@ -18,6 +18,7 @@ type Repository interface {
 	Get(ctx context.Context, id string) (URL, bool)
 	GetAllByUser(ctx context.Context, userID string) ([]URL, error)
 	DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool
+	Close() error
 }
 
 // URL entity represent database table url

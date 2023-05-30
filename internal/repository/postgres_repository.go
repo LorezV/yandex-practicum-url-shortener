@@ -169,3 +169,7 @@ func (r PostgresRepository) DeleteManyByUser(ctx context.Context, urlIDs []strin
 
 	return err == nil
 }
+
+func (r PostgresRepository) Close() error {
+	return r.database.Close()
+}

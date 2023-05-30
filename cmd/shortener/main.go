@@ -75,7 +75,12 @@ func main() {
 	go func() {
 		<-sigint
 
-		err := srv.Shutdown(context.Background())
+		err := repository2.GlobalRepository.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = srv.Shutdown(context.Background())
 		if err != nil {
 			log.Fatal(err)
 		}
