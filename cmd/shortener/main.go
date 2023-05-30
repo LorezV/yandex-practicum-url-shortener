@@ -9,6 +9,7 @@ import (
 	repository2 "github.com/LorezV/url-shorter.git/internal/repository"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -70,7 +71,11 @@ func main() {
 	})
 	r.Get("/ping", handlers.CheckPing)
 
-	srv := &http.Server{Addr: config.AppConfig.ServerAddress, Handler: r}
+	srv := &http.Server{Handler: r}
+	ln, err := net.Listen("tcp", config.AppConfig.ServerAddress)
+	if err != nil {
+		panic(err)
+	}
 
 	go func() {
 		<-sigint
@@ -89,9 +94,13 @@ func main() {
 	}()
 
 	if config.AppConfig.EnableHTTPS {
-		log.Fatal(srv.ListenAndServeTLS("cmd/shortener/server.ctr", "cmd/shortener/server.key"))
+		err = srv.ServeTLS(ln, "cmd/shortener/server.ctr", "cmd/shortener/server.key")
 	} else {
-		log.Fatal(srv.ListenAndServe())
+		err = srv.Serve(ln)
+	}
+
+	if err != http.ErrServerClosed {
+		panic(err)
 	}
 
 	<-shutdown
