@@ -38,7 +38,7 @@ func init() {
 func main() {
 	shutdown := make(chan struct{})
 	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	fmt.Println("Build version:", buildVersion)
 	fmt.Println("Build version:", buildDate)
@@ -74,7 +74,12 @@ func main() {
 
 	go func() {
 		<-sigint
-		srv.Shutdown(context.Background())
+
+		err := srv.Shutdown(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		close(shutdown)
 	}()
 
