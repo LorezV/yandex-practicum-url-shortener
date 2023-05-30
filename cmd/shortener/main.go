@@ -37,7 +37,7 @@ func init() {
 
 func main() {
 	shutdown := make(chan struct{})
-	sigint := make(chan os.Signal, 0)
+	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	fmt.Println("Build version:", buildVersion)
