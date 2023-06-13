@@ -291,6 +291,7 @@ func DeleteUserUrls(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// GetStats return stats
 func GetStats(w http.ResponseWriter, r *http.Request) {
 	addr, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
