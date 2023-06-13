@@ -15,6 +15,7 @@ var AppConfig config
 
 type config struct {
 	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:"127.0.0.1:8080" json:"server_address"`
+	GRPCAddress     string `env:"GRPCAddress" envDefault:"127.0.0.1:8081"`
 	BaseURL         string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080" json:"base_url"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH" json:"file_storage_path"`
 	SecretKey       string `env:"SECRET_KEY" envDefault:"ca5ee5227ead" json:"secret_key"`

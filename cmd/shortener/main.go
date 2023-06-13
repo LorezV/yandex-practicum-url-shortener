@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/internal/config"
+	"github.com/LorezV/url-shorter.git/internal/grpc/shortener"
 	"github.com/LorezV/url-shorter.git/internal/handlers"
 	"github.com/LorezV/url-shorter.git/internal/middlewares"
 	repository2 "github.com/LorezV/url-shorter.git/internal/repository"
+	"google.golang.org/grpc"
 	"log"
 	"math/rand"
 	"net"
@@ -17,6 +19,7 @@ import (
 	"syscall"
 	"time"
 
+	pb "github.com/LorezV/url-shorter.git/proto"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -91,6 +94,22 @@ func main() {
 		}
 
 		close(shutdown)
+	}()
+
+	go func() {
+		gln, grpcError := net.Listen("tcp", config.AppConfig.GRPCAddress)
+		if grpcError != nil {
+			log.Fatal(grpcError)
+			return
+		}
+
+		g := grpc.NewServer()
+		pb.RegisterShortenerServer(g, shortener.NewGRPCServer(config.AppConfig.EnableHTTPS, config.AppConfig.ServerAddress))
+
+		if grpcErr := g.Serve(gln); grpcErr != nil {
+			log.Fatal(grpcErr.Error())
+			return
+		}
 	}()
 
 	if config.AppConfig.EnableHTTPS {
