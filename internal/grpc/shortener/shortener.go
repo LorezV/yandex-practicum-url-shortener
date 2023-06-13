@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/LorezV/url-shorter.git/internal/config"
 	"github.com/LorezV/url-shorter.git/internal/grpc/auth"
 	"github.com/LorezV/url-shorter.git/internal/repository"
 	"log"
 	"time"
 
-	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -36,7 +36,14 @@ func NewGRPCServer(https bool, domain string) *server {
 
 // Ping - обработчик для проверки связи с хранилищем.
 func (s server) Ping(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
-	if !s.s.Pool(ctx) {
+	if len(config.AppConfig.DatabaseDsn) == 0 {
+		return &emptypb.Empty{}, nil
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	if err := config.DB.PingContext(ctx); err != nil {
 		return nil, status.Error(codes.Internal, "database ping failed")
 	}
 
@@ -73,22 +80,19 @@ func (s server) Get(ctx context.Context, l *pb.GetRequest) (*pb.GetResponse, err
 	if len(l.Id) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "id length should be greater than 0")
 	}
-	url, deleted, err := s.s.Get(ctx, l.Id)
-	if errors.Is(err, repository.ErrURLNotFound) {
+	url, ok := repository.GlobalRepository.Get(ctx, l.Id)
+	if !ok {
 		return nil, status.Error(codes.NotFound, "url not found")
 	}
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "server error: %v", err)
-	}
 
-	if deleted {
+	if url.IsDeleted {
 		return nil, status.Error(codes.Unavailable, "link is deleted")
 	}
 
 	return &pb.GetResponse{
-		Id:       l.Id,
-		Url:      url,
-		ShortUrl: s.genShortLink(l.Id),
+		Id:       url.ID,
+		Url:      url.Original,
+		ShortUrl: url.Short,
 	}, nil
 }
 
@@ -108,7 +112,7 @@ func (s server) GetLinks(ctx context.Context, _ *emptypb.Empty) (*pb.GetLinksRes
 	for _, link := range links {
 		b.Links = append(b.Links, &pb.GetLinksResponse_Link{
 			Id:       link.ID,
-			Url:      link.URL,
+			Url:      link.Original,
 			ShortUrl: s.genShortLink(link.ID),
 		})
 	}
@@ -176,27 +180,26 @@ func (s server) GetStats(ctx context.Context, _ *emptypb.Empty) (*pb.GetStatsRes
 	}
 
 	return &pb.GetStatsResponse{
-		Links: stats.URLs,
-		Users: stats.Users,
+		Links: uint64(stats.Urls),
+		Users: uint64(stats.Users),
 	}, nil
 }
 
-func (s server) short(ctx context.Context, user uuid.UUID, url string) (id string, shortURL string, err error) {
+func (s server) short(ctx context.Context, user string, url string) (id string, shortURL string, err error) {
 	if len(url) == 0 {
 		return "", "", errWrongURL
 	}
 
-	id, err = s.s.Add(ctx, url, user)
-	if errors.Is(err, repositories.ErrURLAlreadyExists) {
+	iURL, err := repository.MakeURL(url, user)
+	if errors.Is(err, repository.ErrorURLDuplicate) {
 		return "", "", err
 	}
+
 	if err != nil {
 		return "", "", err
 	}
 
-	shortURL = s.genShortLink(id)
-
-	return id, shortURL, nil
+	return iURL.Original, iURL.Short, nil
 }
 
 func (s server) genShortLink(id string) string {
