@@ -11,7 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
+// ErrUnauthorized error when unauthorized.
 var ErrUnauthorized = errors.New("unauthorized")
+
+// ErrValueIsNotUUID error when value is not uuid.
 var ErrValueIsNotUUID = errors.New("value is not uuid.UUID")
 
 // Load - loads user from string
@@ -52,6 +55,7 @@ func Gen() (user uuid.UUID, signed string) {
 	return user, signed
 }
 
+// GetUser returns user from context.
 func GetUser(ctx context.Context) (user string, err error) {
 	user, ok := ctx.Value(utils.ContextKey("userID")).(string)
 	if !ok {
