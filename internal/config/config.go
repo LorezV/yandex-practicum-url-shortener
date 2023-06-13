@@ -26,7 +26,7 @@ type config struct {
 	TrustedSubnet *net.IPNet `env:"TRUSTED_SUBNET"`
 }
 
-// DB it is a global app lifetime connection to database. If AppConfig.DatabaseDsb is null, DB refer to null pointer.
+// DB it is a global app lifetime connection to database. If AppConfig.DatabaseDsb is null, DB refer to null pointer
 var DB *sql.DB
 
 // LoadAppConfig parse config data from env and after from program flags.
