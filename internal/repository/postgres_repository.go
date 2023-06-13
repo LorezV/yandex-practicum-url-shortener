@@ -92,6 +92,7 @@ func (r PostgresRepository) InsertMany(ctx context.Context, urls []URL) ([]URL, 
 		ON CONFLICT(original) DO UPDATE SET original=$3 
 		RETURNING id, short, original, user_id;
 	`)
+
 	if err != nil {
 		return urls, err
 	}
@@ -173,4 +174,32 @@ func (r PostgresRepository) DeleteManyByUser(ctx context.Context, urlIDs []strin
 // Close close database connection.
 func (r PostgresRepository) Close() error {
 	return r.database.Close()
+}
+
+// GetStats gets stats from postgres repository.
+func (r PostgresRepository) GetStats(ctx context.Context) (Stats, error) {
+	rows, err := r.database.QueryContext(ctx, `SELECT "user_id" FROM "url" GROUP BY "user_id";`)
+	if err != nil {
+		return Stats{}, err
+	}
+
+	if rows.Err() != nil {
+		return Stats{}, err
+	}
+
+	users := 0
+	for rows.Next() {
+		users++
+	}
+
+	var count = 0
+	err = r.database.QueryRowContext(ctx, `SELECT COUNT(*) FROM "url";`).Scan(&count)
+	if err != nil {
+		return Stats{}, err
+	}
+
+	return Stats{
+		Users: users,
+		Urls:  1,
+	}, nil
 }
