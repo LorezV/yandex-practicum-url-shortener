@@ -1,7 +1,7 @@
 package main
 
 import (
-	"flag"
+	"context"
 	"fmt"
 	"github.com/LorezV/url-shorter.git/internal/config"
 	"github.com/LorezV/url-shorter.git/internal/handlers"
@@ -9,8 +9,12 @@ import (
 	repository2 "github.com/LorezV/url-shorter.git/internal/repository"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -24,24 +28,23 @@ var (
 )
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
 	err := config.LoadAppConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	flag.StringVar(&config.AppConfig.ServerAddress, "a", config.AppConfig.ServerAddress, "ip:port")
-	flag.StringVar(&config.AppConfig.BaseURL, "b", config.AppConfig.BaseURL, "protocol://ip:port")
-	flag.StringVar(&config.AppConfig.FileStoragePath, "f", config.AppConfig.FileStoragePath, "Path to file")
-	flag.StringVar(&config.AppConfig.DatabaseDsn, "d", config.AppConfig.DatabaseDsn, "Database connection URL")
+	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
+	shutdown := make(chan struct{})
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
 	fmt.Println("Build version:", buildVersion)
 	fmt.Println("Build version:", buildDate)
 	fmt.Println("Build version:", buildCommit)
 
-	flag.Parse()
 	if len(config.AppConfig.DatabaseDsn) > 0 {
 		repository2.GlobalRepository = repository2.MakePostgresRepository()
 	} else {
@@ -68,5 +71,37 @@ func main() {
 	})
 	r.Get("/ping", handlers.CheckPing)
 
-	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddress, r))
+	srv := &http.Server{Handler: r}
+	ln, err := net.Listen("tcp", config.AppConfig.ServerAddress)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		<-sigint
+
+		err := repository2.GlobalRepository.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = srv.Shutdown(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		close(shutdown)
+	}()
+
+	if config.AppConfig.EnableHTTPS {
+		err = srv.ServeTLS(ln, "cmd/shortener/server.ctr", "cmd/shortener/server.key")
+	} else {
+		err = srv.Serve(ln)
+	}
+
+	if err != http.ErrServerClosed {
+		panic(err)
+	}
+
+	<-shutdown
 }
