@@ -70,7 +70,6 @@ func main() {
 		r.Delete("/", handlers.DeleteUserUrls)
 	})
 	r.Get("/ping", handlers.CheckPing)
-	r.Get("/api/internal/stats", handlers.GetStats)
 
 	srv := &http.Server{Handler: r}
 	ln, err := net.Listen("tcp", config.AppConfig.ServerAddress)
