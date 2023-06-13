@@ -11,6 +11,7 @@ import (
 // GlobalRepository it's repository variable.
 var GlobalRepository Repository
 
+// Stats GetStats function result
 type Stats struct {
 	urls  int
 	users int
