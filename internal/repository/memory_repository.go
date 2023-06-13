@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-// MemoryRepository is Repository implementation for working with urls in memory and file.
+// MemoryRepository is Repository implementation for working with Urls in memory and file.
 type MemoryRepository struct {
 	storage  map[string]URL
 	filePath string
@@ -53,7 +53,7 @@ func (r MemoryRepository) DeleteManyByUser(ctx context.Context, urlIDs []string,
 	return true
 }
 
-// LoadFromFile loads urls from file.
+// LoadFromFile loads Urls from file.
 func (r MemoryRepository) LoadFromFile() (err error) {
 	var file *os.File
 
@@ -183,7 +183,7 @@ func (r MemoryRepository) Close() error {
 	return nil
 }
 
-// GetStats returns urls count and users count;
+// GetStats gets stats from memory repository.
 func (r MemoryRepository) GetStats(ctx context.Context) (Stats, error) {
 	userIDs := make(map[string]string)
 
@@ -192,7 +192,7 @@ func (r MemoryRepository) GetStats(ctx context.Context) (Stats, error) {
 	}
 
 	return Stats{
-		urls:  len(r.storage),
-		users: len(userIDs),
+		Urls:  len(r.storage),
+		Users: len(userIDs),
 	}, nil
 }

@@ -175,6 +175,7 @@ func (r PostgresRepository) Close() error {
 	return r.database.Close()
 }
 
+// GetStats gets stats from postgres repository.
 func (r PostgresRepository) GetStats(ctx context.Context) (Stats, error) {
 	rows, err := r.database.QueryContext(ctx, `SELECT "user_id" FROM "url" GROUP BY "user_id";`)
 	if err != nil {
@@ -193,7 +194,7 @@ func (r PostgresRepository) GetStats(ctx context.Context) (Stats, error) {
 	}
 
 	return Stats{
-		users: users,
-		urls:  1,
+		Users: users,
+		Urls:  1,
 	}, nil
 }
