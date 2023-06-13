@@ -19,10 +19,10 @@ type config struct {
 	BaseURL         string `env:"BASE_URL" envDefault:"http://127.0.0.1:8080" json:"base_url"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH" json:"file_storage_path"`
 	SecretKey       string `env:"SECRET_KEY" envDefault:"ca5ee5227ead" json:"secret_key"`
-	//DatabaseDsn     string `env:"DATABASE_DSN" json:"database_dsn"`
-	EnableHTTPS   bool       `env:"ENABLE_HTTPS" json:"enable_https"`
-	ConfigFile    string     `env:"CONFIG"`
-	DatabaseDsn   string     `env:"DATABASE_DSN" envDefault:"postgres://postgres:2212@localhost:5432/go-learn?sslmode=disable"`
+	DatabaseDsn     string `env:"DATABASE_DSN" json:"database_dsn"`
+	EnableHTTPS     bool   `env:"ENABLE_HTTPS" json:"enable_https"`
+	ConfigFile      string `env:"CONFIG"`
+	//DatabaseDsn   string     `env:"DATABASE_DSN" envDefault:"postgres://postgres:2212@localhost:5432/go-learn?sslmode=disable"`
 	TrustedSubnet *net.IPNet `env:"TRUSTED_SUBNET"`
 }
 
