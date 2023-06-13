@@ -92,6 +92,7 @@ func (r PostgresRepository) InsertMany(ctx context.Context, urls []URL) ([]URL, 
 		ON CONFLICT(original) DO UPDATE SET original=$3 
 		RETURNING id, short, original, user_id;
 	`)
+
 	if err != nil {
 		return urls, err
 	}
