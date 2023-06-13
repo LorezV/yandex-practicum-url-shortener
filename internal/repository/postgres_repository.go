@@ -182,6 +182,10 @@ func (r PostgresRepository) GetStats(ctx context.Context) (Stats, error) {
 		return Stats{}, err
 	}
 
+	if rows.Err() != nil {
+		return Stats{}, err
+	}
+
 	users := 0
 	for rows.Next() {
 		users++

@@ -13,8 +13,8 @@ var GlobalRepository Repository
 
 // Stats GetStats function result
 type Stats struct {
-	Urls  int
-	Users int
+	Urls  int `json:"urls"`
+	Users int `json:"users"`
 }
 
 // Repository is a interface with contains methods for CRUD operations with data.
