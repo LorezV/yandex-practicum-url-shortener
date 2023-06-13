@@ -8,6 +8,7 @@ import (
 	"github.com/LorezV/url-shorter.git/internal/repository"
 	"github.com/LorezV/url-shorter.git/internal/utils"
 	"io"
+	"net"
 	"net/http"
 	"time"
 
@@ -288,4 +289,36 @@ func DeleteUserUrls(w http.ResponseWriter, r *http.Request) {
 	go repository.GlobalRepository.DeleteManyByUser(context.Background(), urlIDs, userID)
 
 	w.WriteHeader(http.StatusAccepted)
+}
+
+// GetStats return stats
+func GetStats(w http.ResponseWriter, r *http.Request) {
+	addr, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	ip := net.ParseIP(addr)
+	if config.AppConfig.TrustedSubnet == nil || !config.AppConfig.TrustedSubnet.Contains(ip) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	stats, err := repository.GlobalRepository.GetStats(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(stats)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
 }

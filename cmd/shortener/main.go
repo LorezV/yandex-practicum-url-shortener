@@ -66,6 +66,7 @@ func main() {
 		r.Get("/{id}", handlers.GetURL)
 		r.Post("/", handlers.CreateURL)
 	})
+	r.Get("/api/internal/stats", handlers.GetStats)
 	r.Post("/api/shorten/batch", handlers.BatchURLJson)
 	r.Post("/api/shorten", handlers.CreateURLJson)
 	r.Route("/api/user/urls", func(r chi.Router) {
