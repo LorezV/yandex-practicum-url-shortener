@@ -38,10 +38,10 @@ func LoadAppConfig() error {
 
 	if s, ok := os.LookupEnv("TRUSTED_SUBNET"); ok {
 		t, err := parseSubnet(s)
-		if err != nil {
-			return err
+
+		if err == nil {
+			AppConfig.TrustedSubnet = t
 		}
-		AppConfig.TrustedSubnet = t
 	}
 
 	flag.StringVar(&AppConfig.ServerAddress, "a", AppConfig.ServerAddress, "ip:port")
@@ -55,11 +55,10 @@ func LoadAppConfig() error {
 
 	if n != nil {
 		t, err := parseSubnet(*n)
-		if err != nil {
-			return err
-		}
 
-		AppConfig.TrustedSubnet = t
+		if err == nil {
+			AppConfig.TrustedSubnet = t
+		}
 	}
 
 	if len(AppConfig.ConfigFile) > 0 {
@@ -110,12 +109,11 @@ func LoadAppConfig() error {
 		}
 
 		if AppConfig.TrustedSubnet == nil {
-			t, err := parseSubnet(tempConfig.TrustedSubnet)
-			if err != nil {
-				return err
-			}
+			t, err := parseSubnet(*n)
 
-			AppConfig.TrustedSubnet = t
+			if err == nil {
+				AppConfig.TrustedSubnet = t
+			}
 		}
 	}
 
