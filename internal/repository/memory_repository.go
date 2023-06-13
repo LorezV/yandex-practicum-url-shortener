@@ -182,3 +182,17 @@ func (r MemoryRepository) Close() error {
 	fmt.Println("Close memory repository")
 	return nil
 }
+
+// GetStats returns urls count and users count;
+func (r MemoryRepository) GetStats(ctx context.Context) (Stats, error) {
+	userIDs := make(map[string]string)
+
+	for _, v := range r.storage {
+		userIDs[v.UserID] = v.UserID
+	}
+
+	return Stats{
+		urls:  len(r.storage),
+		users: len(userIDs),
+	}, nil
+}

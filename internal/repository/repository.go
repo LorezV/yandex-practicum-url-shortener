@@ -11,6 +11,11 @@ import (
 // GlobalRepository it's repository variable.
 var GlobalRepository Repository
 
+type Stats struct {
+	urls  int
+	users int
+}
+
 // Repository is a interface with contains methods for CRUD operations with data.
 type Repository interface {
 	Insert(ctx context.Context, url URL) (URL, error)
@@ -19,6 +24,7 @@ type Repository interface {
 	GetAllByUser(ctx context.Context, userID string) ([]URL, error)
 	DeleteManyByUser(ctx context.Context, urlIDs []string, userID string) bool
 	Close() error
+	GetStats(ctx context.Context) (Stats, error)
 }
 
 // URL entity represent database table url
